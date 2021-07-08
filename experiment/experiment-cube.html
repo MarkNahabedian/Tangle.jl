@@ -1,0 +1,30 @@
+<html>
+  <head>
+    <title>Experimenting with X3D</title>
+    <script type="text/javascript"
+            src="https://www.x3dom.org/download/x3dom.js">
+    </script>
+  </head>
+  <body>
+    <h1>Experimenting with X3D</h1>
+    <div style="border: solid green;">
+      <x3d width="300px" height="300px">
+        <scene render="true" visible="true">
+          <Transform rotation="0 1 0 0.5">
+            <Transform rotation="0 0 1 0.5">
+              <shape render="true" visible="true">
+                <appearance>
+                  <material diffuceColor="green"/>
+                </appearance>
+                <box size="2 2 2"/>
+              </shape>
+            </Transform>
+          </Transform>
+        </scene>
+      </x3d>
+    </div>
+    <p>
+      Done
+    </p>
+  </body>
+</html>
