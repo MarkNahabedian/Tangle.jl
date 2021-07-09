@@ -1,5 +1,7 @@
 module Tangle
 
-# Write your package code here.
+using DataStructures
+
+include("strand.jl")
 
 end
