@@ -54,9 +54,21 @@ end
 
 # Should we enforce that segments of strands don't cross each other.
 
+"""
+addPoint sets a waypoint for the strand.  The StrandPoint is
+returned.
+"""
+function addPoint end
+
 function addPoint(strand::Strand, point::StrandPoint)
     # Should we order strand.points by p?
+    for existing in strand.points
+        if point.p == existing.p
+            throw(Exception("StandPoint with parameter $(point.p) already present in $strand."))
+        end
+    end
     insert!(strand.points, point)
+    return point
 end
 
 function addPoint(strand, p, x, y, z)
@@ -69,16 +81,29 @@ Return the closest `StrandPoint`s of `strand` before and after
 parameter `p`.  If `strand` has no points then `nothing, nothing` is
 returned.  Note that if `strand` has a `StrandPoint` at `p` then both
 return values will be the ame.
+Any `StrandPoint` with parameter `p` is excluded from consideration.
 """
-function nearest(strand::Strand, p)
+function nearest(strand::Strand, p::Real)
     # searchsortedfirst, searchsortedafter
     if length(strand.points) == 0
         return nothing, nothing
     end
-    return (reduce((a, b) -> a.p >= b.p ? a : b,
-                   filter(point -> point.p <= p, strand.points)),
-            reduce((a, b) -> a.p <= b.p ? a : b,
-                   filter(point -> point.p >= p, strand.points)))
+    before = nothing
+    after = nothing
+    # Since strand.points is a SortedSet, there might be a more
+    # optimal way to do this.
+    for point in strand.points
+        if point.p < p
+            if before == nothing || point.p > before.p
+                before = point
+            end
+        elseif point.p > p
+            if after == nothing || point.p < after.p
+                after = point
+            end
+        end
+    end
+    return before, after
 end
 
 function bounds(strand::Strand)
@@ -110,8 +135,12 @@ end
 # Most fabrics are relatively flat.  For these we can assume that all
 # Strands are within some small margin of the z=0 plane.
 
-function cross(over::Strand, overP, under::Strand, underP, x, y; gap=2)
+function cross(over::Strand, overP, under::Strand, underP, x, y;
+               gap=2)::Tuple{StrandPoint, StrandPoint}
     thickness = max(over.thickness, under.thickness)
-    over.addPoint(StrandPoint(overp, x, y, gap * thickness))
-    under.addPoint(StrandPoint(underp, x, y, - gap * thickness))
+    point1 = StrandPoint(overP, x, y, gap * thickness)
+    addPoint(over, point1)
+    point2 = StrandPoint(underP, x, y, - gap * thickness)
+    addPoint(under, point2)
+    return point1, point2
 end
