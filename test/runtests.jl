@@ -35,6 +35,31 @@ using Test
     @test n_1[2] == StrandPoint(0, 0, 0, 0)
 end
 
+@testset "Max Thickness" begin
+    strands = [ Strand(thickness=1),
+                Strand(thickness=2),
+                Strand(thickness=1)
+                ]
+    @test maxThickness(strands...) == 2
+end
+
+@testset "StrandPoints center" begin
+    strand = Strand()
+    addPoint(strand, 1, 0, 0, -1)
+    addPoint(strand, 2, 0, 2, -1)
+    addPoint(strand, 3, 2, 2, 1)
+    addPoint(strand, 4, 2, 0, 1)
+    @test center(strand.points) == StrandPoint(2.5, 1.0, 1.0, 0.0)
+end
+
+@testset "pointAt" begin
+    strand = Strand()
+    addPoint(strand, 0, 0, 10, 0)
+    addPoint(strand, 10, 10, 00, 2)
+    @test pointAt(strand, 2) == StrandPoint(2, 2.0, 8.0, 0.4)
+    @test pointAt(strand, 5) == StrandPoint(5, 5.0, 5.0, 1.0)
+end
+
 @testset "Reidermeister Twist" begin
     strand = Strand(label="foo")
     head = addPoint(strand, 0, 0, 0, 0)
