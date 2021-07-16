@@ -28,7 +28,21 @@ struct StrandPoint
     z::Real
 end
 
-function center(points)::StrandPoint
+function Vec3(point::StrandPoint)::Vec3
+    return Vec3(point.x, point.y, point.z)
+end
+
+function Vec3(from::StrandPoint, to::StrandPoint)::Vec3
+    return Vec3(to.x - from.x,
+                to.y - from.y,
+                to.z - from.z)
+end
+
+function distance(s1::StrandPoint, s2::StrandPoint)::Real
+    LinearAlgebra.norm(Vec3(s2) - Vec3(s1))
+end
+
+function center(points...)::StrandPoint
     count, p, x, y, z = 0, 0, 0, 0, 0
     for point in points
         count += 1
@@ -96,7 +110,7 @@ function addPoint(strand::Strand, point::StrandPoint)
     # Should we order strand.points by p?
     for existing in strand.points
         if point.p == existing.p
-            throw(Exception("StandPoint with parameter $(point.p) already present in $strand."))
+            throw(ErrorException("StandPoint with parameter $(point.p) already present in $strand."))
         end
     end
     insert!(strand.points, point)
@@ -111,20 +125,24 @@ end
     nearest(strand, p)
 Return the closest `StrandPoint`s of `strand` before and after
 parameter `p`.  If `strand` has no points then `nothing, nothing` is
-returned.  Note that if `strand` has a `StrandPoint` at `p` then both
-return values will be the same.
+returned.
 Any `StrandPoint` with parameter `p` is excluded from consideration.
+The third return value is for a point that exactly matchesp.
 """
 function nearest(strand::Strand, p::Real)
     # searchsortedfirst, searchsortedafter
     if length(strand.points) == 0
-        return nothing, nothing
+        return nothing, nothing, nothing
     end
     before = nothing
     after = nothing
+    at = nothing
     # Since strand.points is a SortedSet, there might be a more
     # optimal way to do this.
     for point in strand.points
+        if point.p == p
+            at = point
+        end
         if point.p < p
             if before == nothing || point.p > before.p
                 before = point
@@ -135,27 +153,40 @@ function nearest(strand::Strand, p::Real)
             end
         end
     end
-    return before, after
+    return before, after, at
 end
 
-function pointAt(strand, p)::Union{Nothing, StrandPoint}
-    p1, p2 = nearest(strand, p)
-    if p1 == p2
-        return p1
+"""
+    pointAt(strand, p)
+If `strand` has a point with parameter `p` then return that
+StrandPoint.
+Otherwise, if the `strand` has points both before and after `p` then a
+StrandPoint is interpolated between those points, and is added to the
+strand if `add` is true.
+If `strand` has no point before or after p then nothing is returned since
+there is no basis for interpolation.
+"""
+function pointAt(strand, p; add=false)::Union{Nothing, Tuple{StrandPoint, StrandPoint, StrandPoint}}
+    p1, p2, at = nearest(strand, p)
+    if at != nothing
+        return at, p1, p2
     end
-    # *** What if either p1 or p2 are nothing?
+    # Can't interpolate if either p1 or p2 are nothing:
     if p1 == nothing || p2 == nothing
-        return nothing
+        return nothing, nothing, nothing
     end
-    # center is wrong.  We need to linearly interpolate.
+    # Linearly interpolate between p1 and p2:
     factor = (p - p1.p) / (p2.p - p1.p)
     p3 = StrandPoint(p,
                      p1.x + factor * (p2.x - p1.x),
                      p1.y + factor * (p2.y - p1.y),
                      p1.z + factor * (p2.z - p1.z))
     # Add p3 to strand to ensure repeatability
-    addPoint(strand, p3)
-    return p3
+    if add
+        addPoint(strand, p3)
+    end
+    # Return the point and the nearest points before and after it:
+    return p3, p1, p2
 end
 
 function bounds(strand::Strand)

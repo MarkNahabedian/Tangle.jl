@@ -1,5 +1,13 @@
 using Tangle
 using Test
+using LinearAlgebra
+
+@testset "Vector Utils" begin
+    @test unit_vector(Vec3(5, 0, 0)) == Vec3(1, 0, 0)
+    @test unit_vector(Vec3(0, 2, 0)) == Vec3(0, 1, 0)
+    @test unit_vector(Vec3(0, 0, 4)) == Vec3(0, 0, 1)
+    @test distance(Vec3(1, 1, 0), Vec3(2, 2, 0)) == sqrt(2)
+end
 
 @testset "Strand Tests" begin
     strand = Strand(label="foo")
@@ -21,12 +29,14 @@ using Test
     n2 = nearest(strand, 2)
     @test n2[1] == StrandPoint(1, 4, 1, 0)
     @test n2[2] == StrandPoint(4, 0, 0, 0.5)
+    @test n2[3] == StrandPoint(2, 4, 3, 1)
     n0 = nearest(strand, 0)
     @test n0[1] == StrandPoint(-1, -2, 0, 0)
     @test n0[2] == StrandPoint(1, 4, 1, 0)
     n3 = nearest(strand, 3)    
     @test n3[1] == StrandPoint(2, 4, 3, 1)
     @test n3[2] == StrandPoint(4, 0, 0,0.5)
+    @test n3[3] == nothing
     n5 = nearest(strand, 5)
     @test n5[1] == StrandPoint(4, 0, 0, 0.5)
     @test n5[2] == nothing
@@ -49,36 +59,60 @@ end
     addPoint(strand, 2, 0, 2, -1)
     addPoint(strand, 3, 2, 2, 1)
     addPoint(strand, 4, 2, 0, 1)
-    @test center(strand.points) == StrandPoint(2.5, 1.0, 1.0, 0.0)
+    @test center(strand.points...) == StrandPoint(2.5, 1.0, 1.0, 0.0)
 end
 
 @testset "pointAt" begin
     strand = Strand()
     addPoint(strand, 0, 0, 10, 0)
     addPoint(strand, 10, 10, 00, 2)
-    @test pointAt(strand, 2) == StrandPoint(2, 2.0, 8.0, 0.4)
-    @test pointAt(strand, 5) == StrandPoint(5, 5.0, 5.0, 1.0)
+    @test first(pointAt(strand, 2)) == StrandPoint(2, 2.0, 8.0, 0.4)
+    @test first(pointAt(strand, 5)) == StrandPoint(5, 5.0, 5.0, 1.0)
+    addPoint(strand, 5, 5, 5, 1)
+    p1, p2, p3 = pointAt(strand, 5)
+    @test p1 == StrandPoint(5, 5, 5, 1)
 end
 
 @testset "Reidermeister Twist" begin
     strand = Strand(label="foo")
-    head = addPoint(strand, 0, 0, 0, 0)
-    tail = addPoint(strand, 10, 10, 0, 0)
-    between = addPoint(strand, 5, 5, 0, 0)
+    head = addPoint(strand, 1, 0, 0, 0)
+    tail = addPoint(strand, 13, 10, 0, 0)
+    between = addPoint(strand, 7, 5, 0, 0)
     # Right hand twist:
-    rh1, rh2 = reidermeisterTwistRight(strand, 2, 3, 0)
-    rhloop = addPoint(strand, (rh1.p + rh2.p) / 2, 2, 0, 0)
-    @test nearest(strand, rhloop.p) == (rh1, rh2)
-    @test nearest(strand, rh1.p) == (head, rhloop)
+    rh1, rh2 = reidermeisterTwist(strand, 4)
+    # Right handed: second crosspoint is above first:
+    @test rh1.z < rh2.z
+    # The loop that's formed by reidermeisterTwist has two dianeters:
+    diameter1 = (center(rh1, rh2),
+                 first(pointAt(strand, 4)))
+    diameter2 = (first(pointAt(strand, 3)),
+                 first(pointAt(strand, 5)))
+    # The diameter of the loop should be DEFAULT_LOOP_DIAMETER:
+    @test distance(diameter1...) == DEFAULT_LOOP_DIAMETER
+    @test distance(diameter2...) == DEFAULT_LOOP_DIAMETER
+    # Points at 2, 3, 4, 5, 6 should project to a circle in the x,y
+    # plane:
+    @test center(diameter1...) == center(diameter2...)
+    # euclidean distance between 2 and 6 should correspond to gap
+    @test distance(Vec3(rh1), Vec3(rh2)) ==
+        strand.thickness * DEFAULT_CROSSING_GAP
     # Left hand twist:
-    println("POINTS: ", strand.points)
-    lh1, lh2 = reidermeisterTwistLeft(strand, 8, 3, 0)
-    @test nearest(strand, rh2.p) == (rhloop, between)
-    lhloop = addPoint(strand, (lh1.p + lh2.p) / 2, 8, 0, 0)
-    # *** I should think about why these are swapped?  Handedness?
-    @test nearest(strand, lhloop.p) == (lh2, lh1)
-    # *** I should think about why these are swapped?  Handedness?
-    @test nearest(strand, lh1.p) == (lhloop, tail)
-    @test nearest(strand, lh2.p) == (between, lhloop)
+    lh1, lh2 = reidermeisterTwist(strand, 10, handedness=LeftHanded())
+    # Left handed: second crosspoint is below first:
+    @test lh1.z > lh2.z
+    # The loop that's formed by reidermeisterTwist has two dianeters:
+    diameter3 = (center(lh1, lh2),
+                 first(pointAt(strand, 10)))
+    diameter4 = (first(pointAt(strand, 9)),
+                 first(pointAt(strand, 11)))
+    # The diameter of the loop should be DEFAULT_LOOP_DIAMETER:
+    @test distance(diameter3...) == DEFAULT_LOOP_DIAMETER
+    @test distance(diameter4...) == DEFAULT_LOOP_DIAMETER
+    # Points at 8, 9, 10, 11, 12 should project to a circle in the x,y
+    # plane
+    @test center(diameter3...) == center(diameter4...)
+    # euclidean distance between 8 and 12 should correspond to gap
+    @test distance(Vec3(lh1), Vec3(lh2)) ==
+        strand.thickness * DEFAULT_CROSSING_GAP
 end
 

@@ -1,42 +1,43 @@
 # Reidermeister moves.
 
-export reidermeisterTwistRight, reidermeisterTwistLeft
+export Handedness, RightHanded, LeftHanded, multiplier
+export reidermeisterTwist
 
-function reidermeisterTwist(strand::Strand, p, x, y, handedness)
-    before, after = nearest(strand, p)
-    if before != nothing && after != nothing
-        between(a, b) = (a + b) / 2
-        middle = between(before.p, after.p)
-        p1 = between(middle, before.p)
-        p2 = between(middle, after.p)
-    else
-        if before == nothing
-            p1 = p - 1
-        end
-        if after == nothing
-            p2 = p + 1
-        end
-    end
-    if handedness < 0
-        p1,p2 = p2, p1
-    end
-    # Should we introduce a point between p1 and p2 that is some
-    # distance from x, y to establisgh the size of the loop?
-    cross(strand, p1, strand, p2, x, y)
-end
+
+abstract type Handedness end
+struct RightHanded <: Handedness end
+struct LeftHanded <: Handedness end
+
+multiplier(::RightHanded) = 1
+multiplier(::LeftHanded) = -1
 
 """
-Perform a Reidermeister right hand twist.
-Returns the two StrandPoints at the new crossing.
+    reidermeisterTwist(strand, p; axis, handedness, gap, loop_diameter)
+Form a Reidermeister 1 twist in `strand`.
+The strand will cross itself at parameter p then loop around axis with
+the specified diameter.
 """
-function reidermeisterTwistRight(strand, p, x, y)::Tuple{StrandPoint, StrandPoint}
-    reidermeisterTwist(strand, p, x, y, 1)
-end
-
-"""
-Perform a Reidermeister left hand twist.
-Returns the two StrandPoints at the new crossing.
-"""
-function reidermeisterTwistLeft(strand, p, x, y)::Tuple{StrandPoint, StrandPoint}
-    reidermeisterTwist(strand, p, x, y, -1)
+function reidermeisterTwist(strand::Strand, p;
+                            axis = [0, 0, 1],
+                            handedness = RightHanded(),
+                            gap = DEFAULT_CROSSING_GAP,
+                            loop_diameter = DEFAULT_LOOP_DIAMETER)
+    at, before, after = pointAt(strand, p)
+    direction = unit_vector(Vec3(before, after))
+    # We will at two points for the crossing and three more points to
+    # form a circular loop.  These are the parameter values for tthose
+    # points:
+    pvalues = before.p .+ (collect(1:5) * ((after.p - before.p) / 6))
+    sideways = unit_vector(LinearAlgebra.cross(Vec3(before, after), axis))
+    loop = Vec3(at) + loop_diameter * sideways
+    addPoint(strand, pvalues[3], loop...)
+    loop_center = (Vec3(at) + loop) / 2
+    addPoint(strand, pvalues[2],
+             (loop_center + (direction * (loop_diameter / 2)))...)
+    addPoint(strand, pvalues[4],
+             (loop_center - (direction * (loop_diameter /2)))...)
+    gap_vector = multiplier(handedness) * (gap / 2) * maxThickness(strand) * axis
+    cp1 = addPoint(strand, pvalues[1], (Vec3(at) - gap_vector)...)
+    cp2 = addPoint(strand, pvalues[5], (Vec3(at) + gap_vector)...)
+    return cp1, cp2
 end
