@@ -1,5 +1,5 @@
 export DEFAULT_CROSSING_GAP, DEFAULT_LOOP_DIAMETER
-export StrandPoint, spmatch, center, Bounds, bounds, Strand, maxThickness,
+export StrandPoint, spmatch, center, Bounds, bounds, Strand, find, maxThickness,
     Bounds, addPoint!, nearest, pointAt
 
 """
@@ -82,7 +82,7 @@ struct StrandPoint
 end
 
 function StrandPoint(p)
-    StrandOPoint(Key()p, 0, 0, 0)
+    StrandPoint(Key(), p, 0, 0, 0)
 end
 
 function StrandPoint(p, x, y, z)
@@ -154,6 +154,18 @@ end
 
 function maxThickness(strands...)
     maximum([strand.thickness for strand in strands])
+end
+
+function find(strand::Strand, p)::Union{Nothing, StrandPoint}
+    token = (strand.points,
+             searchsortedfirst(strand.points, StrandPoint(p)))
+    if status(token) == 1
+        point = deref(token)
+        if point.p == p
+            return point
+        end
+    end
+    return nothing
 end
 
 # How can we enforce that a Strand doesn't cross itself or any other

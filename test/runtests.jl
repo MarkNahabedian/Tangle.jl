@@ -17,6 +17,10 @@ end
     addPoint!(strand, Tangle.Shape(), 4, 0, 0, 0.5)
     addPoint!(strand, Tangle.Shape(), -1, -2, 0, 0)
     addPoint!(strand, Tangle.Shape(), 5, -2, 1, 1)
+    @test spmatch(find(strand, 2), StrandPoint(2, 4, 3, 1))
+    @test find(strand, 3) == nothing
+    @test find(strand, 6) == nothing
+    @test find(strand, -2) == nothing
     b = bounds(strand)
     @test b.minP == -1
     @test b.maxP == 5
