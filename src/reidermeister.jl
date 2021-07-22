@@ -30,14 +30,14 @@ function reidermeisterTwist(strand::Strand, p;
     pvalues = before.p .+ (collect(1:5) * ((after.p - before.p) / 6))
     sideways = unit_vector(LinearAlgebra.cross(Vec3(before, after), axis))
     loop = Vec3(at) + loop_diameter * sideways
-    addPoint(strand, pvalues[3], loop...)
+    addPoint!(strand, Shape(), pvalues[3], loop...)
     loop_center = (Vec3(at) + loop) / 2
-    addPoint(strand, pvalues[2],
+    addPoint!(strand, Shape(), pvalues[2],
              (loop_center + (direction * (loop_diameter / 2)))...)
-    addPoint(strand, pvalues[4],
+    addPoint!(strand, Shape(), pvalues[4],
              (loop_center - (direction * (loop_diameter /2)))...)
     gap_vector = multiplier(handedness) * (gap / 2) * maxThickness(strand) * axis
-    cp1 = addPoint(strand, pvalues[1], (Vec3(at) - gap_vector)...)
-    cp2 = addPoint(strand, pvalues[5], (Vec3(at) + gap_vector)...)
+    cp1 = addPoint!(strand, Form(), pvalues[1], (Vec3(at) - gap_vector)...)
+    cp2 = addPoint!(strand, Form(), pvalues[5], (Vec3(at) + gap_vector)...)
     return cp1, cp2
 end

@@ -11,12 +11,12 @@ end
 
 @testset "Strand Tests" begin
     strand = Strand(label="foo")
-    addPoint(strand, 0, 0, 0, 0)
-    addPoint(strand, 1, 4, 1, 0)
-    addPoint(strand, 2, 4, 3, 1)
-    addPoint(strand, 4, 0, 0, 0.5)
-    addPoint(strand, -1, -2, 0, 0)
-    addPoint(strand, 5, -2, 1, 1)
+    addPoint!(strand, Tangle.Shape(), 0, 0, 0, 0)
+    addPoint!(strand, Tangle.Shape(), 1, 4, 1, 0)
+    addPoint!(strand, Tangle.Shape(), 2, 4, 3, 1)
+    addPoint!(strand, Tangle.Shape(), 4, 0, 0, 0.5)
+    addPoint!(strand, Tangle.Shape(), -1, -2, 0, 0)
+    addPoint!(strand, Tangle.Shape(), 5, -2, 1, 1)
     b = bounds(strand)
     @test b.minP == -1
     @test b.maxP == 5
@@ -27,22 +27,22 @@ end
     @test b.minZ == 0
     @test b.maxZ == 1
     n2 = nearest(strand, 2)
-    @test n2[1] == StrandPoint(1, 4, 1, 0)
-    @test n2[2] == StrandPoint(4, 0, 0, 0.5)
-    @test n2[3] == StrandPoint(2, 4, 3, 1)
+    @test spmatch(n2[1], StrandPoint(1, 4, 1, 0))
+    @test spmatch(n2[2], StrandPoint(4, 0, 0, 0.5))
+    @test spmatch(n2[3], StrandPoint(2, 4, 3, 1))
     n0 = nearest(strand, 0)
-    @test n0[1] == StrandPoint(-1, -2, 0, 0)
-    @test n0[2] == StrandPoint(1, 4, 1, 0)
+    @test spmatch(n0[1], StrandPoint(-1, -2, 0, 0))
+    @test spmatch(n0[2], StrandPoint(1, 4, 1, 0))
     n3 = nearest(strand, 3)    
-    @test n3[1] == StrandPoint(2, 4, 3, 1)
-    @test n3[2] == StrandPoint(4, 0, 0,0.5)
+    @test spmatch(n3[1], StrandPoint(2, 4, 3, 1))
+    @test spmatch(n3[2], StrandPoint(4, 0, 0,0.5))
     @test n3[3] == nothing
     n5 = nearest(strand, 5)
-    @test n5[1] == StrandPoint(4, 0, 0, 0.5)
+    @test spmatch(n5[1], StrandPoint(4, 0, 0, 0.5))
     @test n5[2] == nothing
     n_1 = nearest(strand, -1)
     @test n_1[1] == nothing
-    @test n_1[2] == StrandPoint(0, 0, 0, 0)
+    @test spmatch(n_1[2], StrandPoint(0, 0, 0, 0))
 end
 
 @testset "Max Thickness" begin
@@ -55,29 +55,29 @@ end
 
 @testset "StrandPoints center" begin
     strand = Strand()
-    addPoint(strand, 1, 0, 0, -1)
-    addPoint(strand, 2, 0, 2, -1)
-    addPoint(strand, 3, 2, 2, 1)
-    addPoint(strand, 4, 2, 0, 1)
-    @test center(strand.points...) == StrandPoint(2.5, 1.0, 1.0, 0.0)
+    addPoint!(strand, Tangle.Shape(), 1, 0, 0, -1)
+    addPoint!(strand, Tangle.Shape(), 2, 0, 2, -1)
+    addPoint!(strand, Tangle.Shape(), 3, 2, 2, 1)
+    addPoint!(strand, Tangle.Shape(), 4, 2, 0, 1)
+    @test spmatch(center(strand.points...), StrandPoint(2.5, 1.0, 1.0, 0.0))
 end
 
 @testset "pointAt" begin
     strand = Strand()
-    addPoint(strand, 0, 0, 10, 0)
-    addPoint(strand, 10, 10, 00, 2)
-    @test first(pointAt(strand, 2)) == StrandPoint(2, 2.0, 8.0, 0.4)
-    @test first(pointAt(strand, 5)) == StrandPoint(5, 5.0, 5.0, 1.0)
-    addPoint(strand, 5, 5, 5, 1)
+    addPoint!(strand, Tangle.Shape(), 0, 0, 10, 0)
+    addPoint!(strand, Tangle.Shape(), 10, 10, 00, 2)
+    @test spmatch(first(pointAt(strand, 2)), StrandPoint(2, 2.0, 8.0, 0.4))
+    @test spmatch(first(pointAt(strand, 5)), StrandPoint(5, 5.0, 5.0, 1.0))
+    addPoint!(strand, Tangle.Shape(), 5, 5, 5, 1)
     p1, p2, p3 = pointAt(strand, 5)
-    @test p1 == StrandPoint(5, 5, 5, 1)
+    @test spmatch(p1, StrandPoint(5, 5, 5, 1))
 end
 
 @testset "Reidermeister Twist" begin
     strand = Strand(label="foo")
-    head = addPoint(strand, 1, 0, 0, 0)
-    tail = addPoint(strand, 13, 10, 0, 0)
-    between = addPoint(strand, 7, 5, 0, 0)
+    head = addPoint!(strand, Tangle.Shape(), 1, 0, 0, 0)
+    tail = addPoint!(strand, Tangle.Shape(), 13, 10, 0, 0)
+    between = addPoint!(strand, Tangle.Shape(), 7, 5, 0, 0)
     # Right hand twist:
     rh1, rh2 = reidermeisterTwist(strand, 4)
     # Right handed: second crosspoint is above first:

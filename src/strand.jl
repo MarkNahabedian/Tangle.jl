@@ -1,6 +1,6 @@
 export DEFAULT_CROSSING_GAP, DEFAULT_LOOP_DIAMETER
-export StrandPoint, center, Bounds, bounds, Strand, maxThickness,
-    Bounds, addPoint, nearest, pointAt
+export StrandPoint, spmatch, center, Bounds, bounds, Strand, maxThickness,
+    Bounds, addPoint!, nearest, pointAt
 
 """
 The default value for the gap parameter to some functions.  The gap
@@ -16,16 +16,89 @@ diameter of the loop.
 """
 DEFAULT_LOOP_DIAMETER = 10
 
+abstract type StrandPointRole end
+
+"""
+`StrandPoint`s whose role is of type `UnStrandableRole` can not
+be added to a strand.
+"""
+abstract type UnStrandableRole <: StrandPointRole end
+
+"""
+`StrandPoint`s having the `AnyRole` role are used for thesting a
+StrandPoint when we don't care about its role.
+"""
+struct AnyRole <: UnStrandableRole end
+
+"""
+`StrandPoint`s having the `Key` role are only created for lookup by
+parameter.
+"""
+struct Key <: UnStrandableRole end
+
+"""
+`StrandPoint`s having the `Form` role are significant with respect to
+the actual structure of a knot.
+"""
+struct Form <: StrandPointRole end
+
+"""
+`StrandPoint`s having the `Shape` role are meant to inform the shape of
+the resulting knot.
+"""
+struct Shape <: StrandPointRole end
+
+"""
+`StrandPoint`s with the `RoundOut` role might be added to smoothe out
+the shape of the knot for more attractive rendering.
+"""
+struct RoundOut <: StrandPointRole end
+
+# This doesn't seem to work:
+let
+    these = []
+    function export_roles(r)
+        push!(these, :(export $(r)))
+        export_roles.(subtypes(r))
+    end
+    export_roles(StrandPointRole)
+    # Evaluating the expression would give
+    #  ERROR: LoadError: LoadError: syntax: malformed "export" statement
+    dump(Expr(:block, these...))
+end
+
+
 """
 `StrandPoint` provides a way to anchor part of a `Strand` at some
 point in 3 space.  `p` should monotonically increase along the length
 of the Strand.
 """
 struct StrandPoint
+    role::StrandPointRole
     p::Real
     x::Real
     y::Real
     z::Real
+end
+
+function StrandPoint(p)
+    StrandOPoint(Key()p, 0, 0, 0)
+end
+
+function StrandPoint(p, x, y, z)
+    StrandPoint(AnyRole(), p, x, y, z)
+end
+
+function spmatch(p1::StrandPoint, p2::StrandPoint)::Bool
+    if p1.p != p2.p ||
+        p1.x != p2.x ||
+        p1.y != p2.y ||
+        p1.z != p2.z
+        return false
+    end
+    return p1.role == p2.role ||
+        p1.role isa AnyRole ||
+        p2.role isa AnyRole
 end
 
 function Vec3(point::StrandPoint)::Vec3
@@ -54,11 +127,6 @@ function center(points...)::StrandPoint
     return StrandPoint(p/count, x/count, y/count, z/count)
 end
 
-struct StrandPointOrdering <: Base.Order.Ordering
-end
-
-Base.Order.lt(o::StrandPointOrdering, a, b) = a.p < b.p
-
 struct Bounds
     minP
     maxP
@@ -81,8 +149,7 @@ A Strand is infinite in length.
     # close they can be to other Strands:
     thickness = 0.1
     # These points constrain the path of the STrand:
-    points::SortedSet{StrandPoint, StrandPointOrdering} =
-        SortedSet{StrandPoint}(StrandPointOrdering())
+    points = SortedSet{StrandPoint}(Base.Order.By(sp -> sp.p))
 end
 
 function maxThickness(strands...)
@@ -101,13 +168,15 @@ end
 # Should we enforce that segments of strands don't cross each other.
 
 """
-addPoint sets a waypoint for the strand.  The StrandPoint is
+addPoint! sets a waypoint for the strand.  The StrandPoint is
 returned.
 """
-function addPoint end
+function addPoint! end
 
-function addPoint(strand::Strand, point::StrandPoint)
-    # Should we order strand.points by p?
+function addPoint!(strand::Strand, point::StrandPoint)
+    if point.role isa UnStrandableRole
+        throw(ErrorException("addPoint! called on $point."))
+    end
     for existing in strand.points
         if point.p == existing.p
             throw(ErrorException("StandPoint with parameter $(point.p) already present in $strand."))
@@ -117,8 +186,8 @@ function addPoint(strand::Strand, point::StrandPoint)
     return point
 end
 
-function addPoint(strand, p, x, y, z)
-    addPoint(strand, StrandPoint(p, x, y, z))
+function addPoint!(strand, role, p, x, y, z)
+    addPoint!(strand, StrandPoint(role, p, x, y, z))
 end
 
 """
@@ -162,11 +231,11 @@ If `strand` has a point with parameter `p` then return that
 StrandPoint.
 Otherwise, if the `strand` has points both before and after `p` then a
 StrandPoint is interpolated between those points, and is added to the
-strand if `add` is true.
+strand if `role` is specified.
 If `strand` has no point before or after p then nothing is returned since
 there is no basis for interpolation.
 """
-function pointAt(strand, p; add=false)::Union{Nothing, Tuple{StrandPoint, StrandPoint, StrandPoint}}
+function pointAt(strand, p; role=nothing)::Union{Nothing, Tuple{StrandPoint, StrandPoint, StrandPoint}}
     p1, p2, at = nearest(strand, p)
     if at != nothing
         return at, p1, p2
@@ -177,13 +246,14 @@ function pointAt(strand, p; add=false)::Union{Nothing, Tuple{StrandPoint, Strand
     end
     # Linearly interpolate between p1 and p2:
     factor = (p - p1.p) / (p2.p - p1.p)
-    p3 = StrandPoint(p,
+    p3 = StrandPoint(role == nothing ? Key() : role,
+                     p,
                      p1.x + factor * (p2.x - p1.x),
                      p1.y + factor * (p2.y - p1.y),
                      p1.z + factor * (p2.z - p1.z))
     # Add p3 to strand to ensure repeatability
-    if add
-        addPoint(strand, p3)
+    if role != nothing
+        addPoint!(strand, p3)
     end
     # Return the point and the nearest points before and after it:
     return p3, p1, p2
@@ -221,9 +291,9 @@ end
 function cross(over::Strand, overP, under::Strand, underP, x, y;
                gap=DEFAULT_CROSSING_GAP)::Tuple{StrandPoint, StrandPoint}
     thickness = maxThickness(over, under)
-    point1 = StrandPoint(overP, x, y, gap * thickness)
-    addPoint(over, point1)
-    point2 = StrandPoint(underP, x, y, - gap * thickness)
-    addPoint(under, point2)
+    point1 = StrandPoint(Form(), overP, x, y, gap * thickness)
+    addPoint!(over, point1)
+    point2 = StrandPoint(Form(), underP, x, y, - gap * thickness)
+    addPoint!(under, point2)
     return point1, point2
 end

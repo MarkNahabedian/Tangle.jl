@@ -1,6 +1,7 @@
 module Tangle
 
 using DataStructures
+using InteractiveUtils
 import StaticArrays
 import LinearAlgebra
 
