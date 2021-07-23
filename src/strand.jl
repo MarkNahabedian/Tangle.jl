@@ -89,6 +89,10 @@ function StrandPoint(p, x, y, z)
     StrandPoint(AnyRole(), p, x, y, z)
 end
 
+spmatch(::Nothing, ::Nothing) = true
+spmatch(::Nothing, ::StrandPoint) = false
+spmatch(::StrandPoint, ::Nothing) = false
+
 function spmatch(p1::StrandPoint, p2::StrandPoint)::Bool
     if p1.p != p2.p ||
         p1.x != p2.x ||
@@ -208,33 +212,29 @@ Return the closest `StrandPoint`s of `strand` before and after
 parameter `p`.  If `strand` has no points then `nothing, nothing` is
 returned.
 Any `StrandPoint` with parameter `p` is excluded from consideration.
-The third return value is for a point that exactly matchesp.
+The third return value is for a point that exactly matches `p`.
 """
 function nearest(strand::Strand, p::Real)
-    # searchsortedfirst, searchsortedafter
-    if length(strand.points) == 0
-        return nothing, nothing, nothing
-    end
-    before = nothing
-    after = nothing
-    at = nothing
-    # Since strand.points is a SortedSet, there might be a more
-    # optimal way to do this.
-    for point in strand.points
-        if point.p == p
-            at = point
+    token = (strand.points,
+             searchsortedfirst(strand.points, StrandPoint(p)))
+    sdr(subtok) = status((strand.points, subtok)) == 1 ?
+        deref((strand.points, subtok)) :
+        nothing
+    if status(token) == 1
+        sp = deref(token)
+        if sp.p == p
+            return (sdr(regress(token)),
+                    sdr(advance(token)),
+                    deref(token))
+        else
+            return (sdr(regress(token)),
+                    deref(token),
+                    nothing)
         end
-        if point.p < p
-            if before == nothing || point.p > before.p
-                before = point
-            end
-        elseif point.p > p
-            if after == nothing || point.p < after.p
-                after = point
-            end
-        end
+    elseif status(token) == 3
+        return (sdr(regress(token)), nothing, nothing)
     end
-    return before, after, at
+    return nothing, nothing, nothing
 end
 
 """

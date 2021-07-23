@@ -37,6 +37,7 @@ end
     n0 = nearest(strand, 0)
     @test spmatch(n0[1], StrandPoint(-1, -2, 0, 0))
     @test spmatch(n0[2], StrandPoint(1, 4, 1, 0))
+    @test spmatch(n0[3], StrandPoint(0, 0, 0, 0))
     n3 = nearest(strand, 3)    
     @test spmatch(n3[1], StrandPoint(2, 4, 3, 1))
     @test spmatch(n3[2], StrandPoint(4, 0, 0,0.5))
@@ -44,9 +45,19 @@ end
     n5 = nearest(strand, 5)
     @test spmatch(n5[1], StrandPoint(4, 0, 0, 0.5))
     @test n5[2] == nothing
+    @test spmatch(n5[3], StrandPoint(5, -2, 1, 1))
     n_1 = nearest(strand, -1)
     @test n_1[1] == nothing
     @test spmatch(n_1[2], StrandPoint(0, 0, 0, 0))
+    @test spmatch(n_1[3], StrandPoint(-1, -2, 0, 0))
+    n6 = nearest(strand, 6)
+    @test spmatch(n6[1], StrandPoint(5, -2, 1, 1))
+    @test n6[2] == nothing
+    @test n6[3] == nothing
+    n_2 = nearest(strand, -2)
+    @test n_2[1] == nothing
+    @test spmatch(n_2[2], StrandPoint(-1, -2, 0, 0))
+    @test n_2[3] == nothing
 end
 
 @testset "Max Thickness" begin
