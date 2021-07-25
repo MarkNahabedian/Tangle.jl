@@ -64,7 +64,7 @@ let
     export_roles(StrandPointRole)
     # Evaluating the expression would give
     #  ERROR: LoadError: LoadError: syntax: malformed "export" statement
-    dump(Expr(:block, these...))
+    # dump(Expr(:block, these...))
 end
 
 

@@ -9,4 +9,6 @@ include("vector_utils.jl")
 include("strand.jl")
 include("reidermeister.jl")
 
+include("links.jl")
+
 end

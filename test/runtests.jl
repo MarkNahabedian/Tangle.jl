@@ -2,6 +2,8 @@ using Tangle
 using Test
 using LinearAlgebra
 
+include("link_tests.jl")
+
 @testset "Vector Utils" begin
     @test unit_vector(Vec3(5, 0, 0)) == Vec3(1, 0, 0)
     @test unit_vector(Vec3(0, 2, 0)) == Vec3(0, 1, 0)
