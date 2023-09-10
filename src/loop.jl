@@ -1,6 +1,6 @@
 using CubicSplines
 
-export Loop, grab
+export Loop, next, previous, grab
 
 abstract type Operaation end
 
@@ -26,7 +26,7 @@ struct PointOfInterest
     x::AbstractFloat
     y::AbstractFloat
     z::AbstractFloat
-    why
+    label
 end
 
 const PointsOfInterest = Vector{PointOfInterest}
@@ -66,12 +66,15 @@ struct Loop
             PointOfInterest(KnotParameter(0.25),  0.0,  1.0, 0.0, :north),
             PointOfInterest(KnotParameter(0.5),  -1.0,  0.0, 0.0, :west),
             PointOfInterest(KnotParameter(0.75),  0.0, -1.0, 0.0, :south),
-            PointOfInterest(MAX_KnotParameter,  1.0,  0.0, 0.0, :closed) ])
+            # CubicSplines needs at least 5 data points:
+            PointOfInterest(MAX_KnotParameter,  1.0,  0.0, 0.0, :closed)
+        ])
     end
     
     function Loop(poi)
         poi = sort(poi)
         values(fieldname) = map(p -> getfield(p, fieldname), poi)
+        # ??? Do we need to explicitly repeat the first PointOfInterest?
         p = map(p -> p.p, values(:p))
         x = CubicSpline(p, values(:x))
         y = CubicSpline(p, values(:y))
@@ -94,13 +97,51 @@ function (loop::Loop)(p::KnotParameter)
     loop.knot_function(p)
 end
 
+
+"""
+   next(loop::Loop, kp::KnotParameter)
+
+If `kp` is the KnotParameter of some `PointOfInterest` in `loop` then
+return the next `PointOfInterest` in that `loop`.
+"""
+function next(loop::Loop, kp::KnotParameter)
+    i = findfirst(loop.poi) do poi
+        poi.p > kp
+    end
+    if i == nothing
+        # Wrap around
+        return loop.poi[1]
+    end
+    return loop.poi[i]
+end
+
+
+"""
+   previous(loop::Loop, kp::KnotParameter)
+
+If `kp` is the KnotParameter of some `PointOfInterest` in `loop` then
+return the next `PointOfInterest` in that `loop`.  Otherwise, return
+`nothing`.
+"""
+function previous(loop::Loop, kp::KnotParameter)
+    i = findlast(loop.poi) do poi
+        poi.p < kp
+    end
+    if i == nothing
+        # wrap around
+        return loop.poi[lastindex(loop.poi)]
+    end
+    return loop.poi[i]
+end
+
+
 function unit_vector(v)
     sqrt(reduce(+, (map(n -> n*2, v))))
 end
 
 
 """
-    grab(::Loop, ::KnotParameter, why, delta)
+    grab(::Loop, ::KnotParameter, label, delta)
 
     Return a new Loop with a point of interest added at the specified
     KnotParameter with the specified symbol.
@@ -108,9 +149,9 @@ end
     The new point of interest will be radialy bumped out from the
     origin by `delta`.
 
-    `why` provides a way to label or explain the reason for grabbing.
+    `label` provides a way to label or explain the reason for grabbing.
 """
-function grab(loop::Loop, p::KnotParameter, why::Symbol, delta)::Loop
+function grab(loop::Loop, p::KnotParameter, label::Symbol, delta)::Loop
     if p in map(poi -> poi.p, loop.poi)
         return loop
     end
@@ -118,8 +159,8 @@ function grab(loop::Loop, p::KnotParameter, why::Symbol, delta)::Loop
     uv = point / sqrt(reduce(+, map(n -> n^2, point)))
     poi = [ loop.poi...,
             PointOfInterest(p,
-                                (point + delta * uv)...,
-                            why)
+                            (point + delta * uv)...,
+                            label)
             ]
     Loop(poi)
 end

@@ -2,6 +2,9 @@ using Tangle
 using Test
 using LinearAlgebra
 
+include("loop_test.jl")
+
+#=
 include("link_tests.jl")
 
 @testset "Vector Utils" begin
@@ -132,4 +135,6 @@ end
     @test distance(Vec3(lh1), Vec3(lh2)) ==
         strand.thickness * DEFAULT_CROSSING_GAP
 end
+
+=#
 

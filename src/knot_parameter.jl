@@ -1,5 +1,5 @@
 
-export KnotParameter, KP, MAX_KnotParameter
+export KnotParameter, KP, MIN_KnotParameter, MAX_KnotParameter
 
 struct KnotParameter
     p::Float16
@@ -9,6 +9,7 @@ end
 
 KP = KnotParameter
 
+MIN_KnotParameter = KnotParameter(0)
 MAX_KnotParameter = KnotParameter(prevfloat(Float16(1.0)))
 
 Base.isless(a::KnotParameter, b::KnotParameter) = isless(a.p, b.p)
