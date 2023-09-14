@@ -7,6 +7,16 @@ struct KnotParameter
     KnotParameter(p) = new(mod(p, 1))
 end
 
+Base.zero(::KnotParameter) = KnotParameter(zero(Float16))
+Base.zero(::Type{KnotParameter}) = KnotParameter(zero(Float16))
+
+Base.rem(kp1::KnotParameter, kp2::KnotParameter) =
+    KnotParameter(rem(kp1.p, kp2.p))
+
+Base.Float64(kp::KnotParameter) = Float64(kp.p)
+Base.Float32(kp::KnotParameter) = Float32(kp.p)
+Base.Float16(kp::KnotParameter) = Float16(kp.p)
+
 KP = KnotParameter
 
 MIN_KnotParameter = KnotParameter(0)
@@ -29,3 +39,15 @@ Base.:*(a::Number, p::KnotParameter) = a * p.p
 Base.:*(p::KnotParameter, a::Number) = p.p * a
 Base.:/(n::Float64, p::KnotParameter) = n / p.p
 
+
+"""
+    divide_interval(from::KnotParameter, to::KnotParameter, count::Integer
+
+Return `count` KnotParameters evenly spaces between `from` and `to`.
+"""
+function divide_interval(from::KnotParameter, to::KnotParameter, count::Integer)
+    delta = (to.p - from.p) / (count + 1)
+    map(1:count) do i
+        from + KnotParameter(i * delta)
+    end
+end

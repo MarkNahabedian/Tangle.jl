@@ -3,7 +3,6 @@ module Tangle
 using DataStructures
 using InteractiveUtils
 import StaticArrays
-import LinearAlgebra
 
 include("knot_parameter.jl")
 include("loop.jl")
