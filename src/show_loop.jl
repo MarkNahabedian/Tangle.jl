@@ -1,6 +1,6 @@
 # SOme utilities for showing and diagnosing Loops.
 
-using Plots: plot
+using Plots: plot, plot!, annotate!
 
 export show_points, flat_graph_loop, graph_loop
 
@@ -30,13 +30,19 @@ function flat_graph_loop(loop::Loop; steps_between_poi=4)
     points = loop_points_for_graph(loop, steps_between_poi)
     plt = plot(map(p -> p[1], points),
                map(p -> p[2], points),
-               background = :black)
-    controls = map(spatial_coordinates, loop.poi)
-    plot(map(p -> p[1], controls),
-         map(p -> p[2], controls),
-         background = :black,
-         markershape = :circle)
-
+               background = :black,
+               linewidth = 4)
+    # Overlay points of interest
+    let
+        x = map(poi -> poi.x, loop.poi)
+        y = map(poi -> poi.y, loop.poi)
+        labels = map(poi -> string(poi.label), loop.poi)
+        plot!(x, y,
+              background = :black,
+              linewidth = 0,
+              markershape = :circle)
+        annotate!(x, y, labels)
+    end
 end
 
 function graph_loop(loop::Loop; steps_between_poi=4)
@@ -44,14 +50,20 @@ function graph_loop(loop::Loop; steps_between_poi=4)
     plt = plot(map(p -> p[1], points),
                map(p -> p[2], points),
                map(p -> p[3], points),
-               background = :black)
+               background = :black,
+               linewidth = 4)
     # Overlay points of interest
-    controls = map(spatial_coordinates, loop.poi)
-    plot(map(p -> p[1], controls),
-         map(p -> p[2], controls),
-         map(p -> p[3], controls),
-         background = :black,
-         markershape = :circle)
+    let
+        x = map(poi -> poi.x, loop.poi)
+        y = map(poi -> poi.y, loop.poi)
+        z = map(poi -> poi.z, loop.poi)
+        labels = map(poi -> string(poi.label), loop.poi)
+        plot!(x, y, z,
+              background = :black,
+              linewidth = 0,
+              markershape = :circle)
+        annotate!(x, y, z, labels)
+    end
 end
 
 
@@ -207,6 +219,7 @@ the previous example, but the knots are specified as 0, 0, 0, 1, 1,
 
 =#
 
+#=
 using MeshIO
 
 function loop_to_obj(loop::Loop, filename)
@@ -215,4 +228,5 @@ function loop_to_obj(loop::Loop, filename)
     
     obj.write()
 end
+=#
 
