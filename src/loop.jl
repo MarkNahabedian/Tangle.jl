@@ -1,9 +1,11 @@
 using CubicSplines
 using Printf
 
-export Loop, operations, InitializeLoop, find_poi, next, previous
+export Loop, operations, InitializeLoop, find_poi, next, previous, LoopSegmentsIterator
 
 
+# Maybe rename Loop to String and specify locations for its endpoints.
+# Endpoints would defaultto the same point.
 """
     Loop
 
@@ -159,6 +161,35 @@ end
 
 next(loop::Loop, poi::PointOfInterest) = next(loop, poi.p)
 previous(loop::Loop, poi::PointOfInterest) = previous(loop, poi.p)
+
+
+"""
+    LoopSegmentsIterator(::Loop)
+
+Return an iterator for iterating over the segments of a Loop.
+
+Each segment is a two element tuple of successive points of interest
+of Loop.
+"""
+struct LoopSegmentsIterator
+    loop::Loop
+end
+
+function Base.iterate(i::LoopSegmentsIterator)
+    if length(i.loop.poi) < 1
+        return nothing
+    end
+    (i.loop.poi[1], i.loop.poi[2]), i.loop.poi[2]
+end
+
+function Base.iterate(i::LoopSegmentsIterator, state::PointOfInterest)
+    if state == i.loop.poi[1]
+        # wrapped around.
+        return nothing
+    end
+    n = next(i.loop, state)
+    (state, n), n
+end
 
 
 function operations(loop::Loop)

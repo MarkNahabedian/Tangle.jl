@@ -23,3 +23,25 @@ end
     @test previous(loop, MIN_KnotParameter).label == :closed
 end
 
+@testset "LoopSegmentsIterator" begin
+    loop = Loop()
+    nxt = nothing
+    count = length(loop.poi)
+    for (s1, s2) in LoopSegmentsIterator(loop)
+        @test count > 0
+        if count <= 0
+            break
+        end
+        @test s1 != s2
+        @test s2.p == next(loop, s1).p
+        @test s2.label == next(loop, s1).label
+        @test s2 == next(loop, s1)
+        @test s1.p == previous(loop, s2).p
+        if nxt != nothing
+            @test nxt == s1
+        end
+        nxt = s2
+        count -= 1
+    end
+end
+
