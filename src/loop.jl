@@ -175,6 +175,8 @@ struct LoopSegmentsIterator
     loop::Loop
 end
 
+const Segment = Tuple{PointOfInterest,PointOfInterest}
+
 function Base.iterate(i::LoopSegmentsIterator)
     if length(i.loop.poi) < 1
         return nothing
