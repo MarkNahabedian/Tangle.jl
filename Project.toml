@@ -16,6 +16,9 @@ StaticArrays = "90137ffa-7385-5640-81b9-e52037218182"
 
 [compat]
 MeshIO = "0.4"
+GR = "0.72"
+DataStructures = "0.18"
+Plots = "1"
 julia = "1.9"
 
 [extras]
