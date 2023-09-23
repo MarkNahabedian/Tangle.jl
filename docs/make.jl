@@ -1,3 +1,7 @@
+using Pkg
+
+Pkg.add("Documenter")
+
 using Tangle
 using Documenter
 
