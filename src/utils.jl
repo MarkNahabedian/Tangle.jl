@@ -1,5 +1,5 @@
 
-distance(v) = sqrt(reduce(+, (map(n -> n^2, v))))
+distance(v) = sqrt(sum(n -> n^2, v))
 
 function unit_vector(v)
     v / distance(v)
