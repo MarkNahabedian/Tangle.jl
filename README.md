@@ -1,7 +1,6 @@
 # Tangle
 
-[![Stable](https://img.shields.io/badge/docs-stable-blue.svg)](https://MarkNahabedian.github.io/Tangle.jl/stable/)
-[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://MarkNahabedian.github.io/Tangle.jl/dev/)
+[![Dev](https://img.shields.io/badge/docs-dev-blue.svg)](https://MarkNahabedian.github.io/Tangle.jl)
 [![Build Status](https://github.com/MarkNahabedian/Tangle.jl/actions/workflows/CI.yml/badge.svg?branch=main)](https://github.com/MarkNahabedian/Tangle.jl/actions/workflows/CI.yml?query=branch%3Amain)
 [![Test Coverage](https://codecov.io/gh/MarkNahabedian/Tangle.jl/branch/main/graph/badge.svg?branch=main)](https://codecov.io/gh/MarkNahabedian/Tangle.jl)
 
