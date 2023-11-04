@@ -1,6 +1,9 @@
 
 export KnotParameter, KP, MIN_KnotParameter, MAX_KnotParameter
 
+"""
+KnotParameter is a floating point number modulo 1.
+"""
 struct KnotParameter
     p::Float16
 
@@ -43,7 +46,7 @@ Base.:/(n::Float64, p::KnotParameter) = n / p.p
 """
     divide_interval(from::KnotParameter, to::KnotParameter, count::Integer
 
-Return `count` KnotParameters evenly spaces between `from` and `to`.
+Return `count` KnotParameters evenly spaced between `from` and `to`.
 """
 function divide_interval(from::KnotParameter, to::KnotParameter, count::Integer)
     delta = (to.p - from.p) / (count + 1)
