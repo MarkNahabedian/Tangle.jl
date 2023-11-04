@@ -4,8 +4,8 @@ using Printf
 export Loop, operations, InitializeLoop, find_poi, next, previous, LoopSegmentsIterator
 
 
-# Maybe rename Loop to String and specify locations for its endpoints.
-# Endpoints would defaultto the same point.
+# Maybe rename Loop to Cord or Rope and specify locations for its endpoints.
+# Endpoints would default to the same point.
 """
     Loop
 
@@ -112,7 +112,7 @@ end
 """
     find_poi(predicate, ::Loop)
 
-Return the `PointOfInterest` from the Loop which satisfies `predicate.
+Return the `PointOfInterest` from the Loop which satisfies `predicate`.
 """
 function find_poi(predicate, loop::Loop)
     i = findfirst(predicate, loop.poi)

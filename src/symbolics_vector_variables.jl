@@ -5,7 +5,7 @@ using Symbolics: variable
 """
     symbolic_vector(name::Symbol, n::Integer)
 
-Define `n` Symbolics variables hose names are based on `name` and
+Define `n` Symbolics variables whose names are based on `name` and
 return a vector of those variables.
 """
 function symbolic_vector(name::Symbol, n::Integer)

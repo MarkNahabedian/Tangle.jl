@@ -27,9 +27,11 @@ CROSSPOINT_SEPARATION = Float16(0.1)
    reidemeisterTwist(loop::Loop, handle::PointOfInterest, twist::Twist)
 
 Return a new loop by applying the Reidermeister I (twist) operation to
-loop at `handle`.  `twist` determines the direstion of twist.
+`loop` at `handle`.
 
-`handle` should be the resulkt of a grab operation.
+`twist` determines the direstion of twist.
+
+`handle` should be the result of a grab operation.
 """
 function reidemeisterTwist(loop::Loop, handle::PointOfInterest, twist)
     op = ReidermeisterTwist(loop, handle, twist)

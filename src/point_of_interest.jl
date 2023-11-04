@@ -12,14 +12,14 @@ end
     PointOfInterest
 
 PointOfInterest represents a point on a `Loop` for which a location
-has been spoecified.
+has been specified.
 
 No two points of interest should have the same KnotParameter widthin a
 Loop.
 
 No two points of interest should have equal coordinates within the
 same mathematical link.
-n
+
 Currently, no code enforces these rules.
 """
 @Base.kwdef struct PointOfInterest
@@ -58,3 +58,12 @@ function spatial_coordinates(point::Vector)
         return point[2:end]
     end
 end
+
+#=
+const Segment = Tuple{PointOfInterest,PointOfInterest}
+
+distance(s::Segment) = distance(vector(s))
+
+vector(s::Segment) = s[2] - s[1]
+
+=#
