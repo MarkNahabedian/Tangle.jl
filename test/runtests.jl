@@ -2,6 +2,8 @@ using Tangle
 using Test
 using LinearAlgebra
 
+include("geometry_test.jl")
+
 include("loop_test.jl")
 
 #=

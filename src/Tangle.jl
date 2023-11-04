@@ -5,6 +5,8 @@ using InteractiveUtils
 import StaticArrays
 
 include("utils.jl")
+include("symbolics_vector_variables.jl")
+include("geometry.jl")
 include("knot_parameter.jl")
 include("point_of_interest.jl")
 include("loop.jl")
