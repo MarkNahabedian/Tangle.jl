@@ -22,6 +22,7 @@ GR = "0.72"
 MeshIO = "0.4"
 Plots = "1"
 StaticArrays = "1"
+Symbolics = "5"
 julia = "1.9"
 
 [extras]
