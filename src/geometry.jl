@@ -18,9 +18,16 @@ end
 
 direction_vector(line::Line) = line.point2 - line.point1
 
-function unit_direction_vector(line::Line)
-    dv = direction_vector(line)
-    dv / norm(dv)
+unit_direction_vector(line::Line) =
+    unit_vector(direction_vector(line))
+
+
+"""
+A Line can be treated as a parametric function to identify
+some point on the line.
+"""
+function (line::Line)(parameter)::Vector
+    line.point1 + parameter * direction_vector(line)
 end
 
 
@@ -37,11 +44,41 @@ end
 
 
 """
-A Line can be treated as a parametric function to identify
-some point on the line.
+    point_on_line(point, line::Line)::Bool
+
+Return true if `line` intersects `point`.
 """
-function (line::Line)(parameter)::Vector
-    line.point1 + parameter * direction_vector(line)
+function point_on_line(point, line::Line)::Bool
+    d1 = unit_direction_vector(line)
+    d2 = unit_vector(point - line.point1)
+    d1 == d2 || d1 == - d2
+end
+
+function scalar_for_point(line::Line, point)
+    p = (point - line.point1) ./ 
+        (line.point2 - line.point1)
+    if all(x -> x == p[1], p)
+        return p[1]
+    end
+end
+
+
+"""
+    point_in_segment(point, segment::Line)
+
+If `point` is on the specified `Line` and lies within the
+defining points of that `Line` then return the parameter
+`p` such that `line(p) == point`, otherwise return nothing.
+"""
+function point_in_segment(point, segment::Line)
+    s = scalar_for_point(segment, point)
+    if s == nothing
+        return nothing
+    end
+    if s >= 0.0 && s <= 1.0
+        return s
+    end
+    return nothing
 end
 
 
