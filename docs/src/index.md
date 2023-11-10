@@ -33,6 +33,7 @@ next
 previous
 before
 after
+LoopSegmentIterator
 ```
 
 
@@ -40,6 +41,7 @@ after
 
 ```@docs
 grab
+was
 reidemeisterTwist
 ```
 
@@ -56,4 +58,16 @@ Tangle.point_on_line
 Tangle.point_in_segment
 Tangle.proximal_points
 ```
+
+
+## Symbolics.jl
+
+Portions of Tangle use Symbolics.jl.  Some utilities have been defined
+to make it easier to use vectors in Symbolics.jl.
+
+```@docs
+Tangle.symbolic_vector
+Tangle.vsubs
+```
+
 
