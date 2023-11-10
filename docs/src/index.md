@@ -33,7 +33,7 @@ next
 previous
 before
 after
-LoopSegmentIterator
+Tangle.LoopSegmentIterator
 ```
 
 
