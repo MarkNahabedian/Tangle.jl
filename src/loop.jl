@@ -73,6 +73,13 @@ struct InitializeLoop <:Operation
 end
 
 
+"""
+    center(points)
+
+Return the point at the center of the collection of points.
+"""
+function center end
+
 center(points::Vector{<:Real}...) =
     reduce(+, points) / length(points)
 

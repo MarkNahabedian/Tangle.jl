@@ -16,8 +16,20 @@ struct Line
     point2::Vector
 end
 
+
+"""
+    direction_vector(::Line)
+
+Return a direction vector for the `Line`.
+"""
 direction_vector(line::Line) = line.point2 - line.point1
 
+
+"""
+    unit_direction_vector(::Line)
+
+Return the unit direction vector for the `Line`.
+"""
 unit_direction_vector(line::Line) =
     unit_vector(direction_vector(line))
 

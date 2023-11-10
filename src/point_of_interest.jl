@@ -40,6 +40,10 @@ PointOfInterest(p::KnotParameter,
                     PointOfInterest(p, x, y, z, label, operation, false)
 
 
+"""
+PointsOfInterest is a sequence whose elements are PointsOfInterest
+objects.
+"""
 const PointsOfInterest = Vector{PointOfInterest}
 
 Base.sort(poi::PointsOfInterest) = sort(poi; by = poi -> poi.p)
