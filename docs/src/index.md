@@ -71,3 +71,8 @@ Tangle.vsubs
 ```
 
 
+## Everything
+
+```@autodocs
+Modules = [ Tangle ]
+```
