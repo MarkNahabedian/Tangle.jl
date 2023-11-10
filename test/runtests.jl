@@ -6,6 +6,8 @@ include("geometry_test.jl")
 
 include("loop_test.jl")
 
+include("reidermeister_twist_test.jl")
+
 #=
 include("link_tests.jl")
 
@@ -93,49 +95,6 @@ end
     addPoint!(strand, Tangle.Shape(), 5, 5, 5, 1)
     p1, p2, p3 = pointAt(strand, 5)
     @test spmatch(p1, StrandPoint(5, 5, 5, 1))
-end
-
-@testset "Reidermeister Twist" begin
-    strand = Strand(label="foo")
-    head = addPoint!(strand, Tangle.Shape(), 1, 0, 0, 0)
-    tail = addPoint!(strand, Tangle.Shape(), 13, 10, 0, 0)
-    between = addPoint!(strand, Tangle.Shape(), 7, 5, 0, 0)
-    # Right hand twist:
-    rh1, rh2 = reidermeisterTwist(strand, 4)
-    # Right handed: second crosspoint is above first:
-    @test rh1.z < rh2.z
-    # The loop that's formed by reidermeisterTwist has two dianeters:
-    diameter1 = (center(rh1, rh2),
-                 first(pointAt(strand, 4)))
-    diameter2 = (first(pointAt(strand, 3)),
-                 first(pointAt(strand, 5)))
-    # The diameter of the loop should be DEFAULT_LOOP_DIAMETER:
-    @test distance(diameter1...) == DEFAULT_LOOP_DIAMETER
-    @test distance(diameter2...) == DEFAULT_LOOP_DIAMETER
-    # Points at 2, 3, 4, 5, 6 should project to a circle in the x,y
-    # plane:
-    @test center(diameter1...) == center(diameter2...)
-    # euclidean distance between 2 and 6 should correspond to gap
-    @test distance(Vec3(rh1), Vec3(rh2)) ==
-        strand.thickness * DEFAULT_CROSSING_GAP
-    # Left hand twist:
-    lh1, lh2 = reidermeisterTwist(strand, 10, handedness=LeftHanded())
-    # Left handed: second crosspoint is below first:
-    @test lh1.z > lh2.z
-    # The loop that's formed by reidermeisterTwist has two dianeters:
-    diameter3 = (center(lh1, lh2),
-                 first(pointAt(strand, 10)))
-    diameter4 = (first(pointAt(strand, 9)),
-                 first(pointAt(strand, 11)))
-    # The diameter of the loop should be DEFAULT_LOOP_DIAMETER:
-    @test distance(diameter3...) == DEFAULT_LOOP_DIAMETER
-    @test distance(diameter4...) == DEFAULT_LOOP_DIAMETER
-    # Points at 8, 9, 10, 11, 12 should project to a circle in the x,y
-    # plane
-    @test center(diameter3...) == center(diameter4...)
-    # euclidean distance between 8 and 12 should correspond to gap
-    @test distance(Vec3(lh1), Vec3(lh2)) ==
-        strand.thickness * DEFAULT_CROSSING_GAP
 end
 
 =#

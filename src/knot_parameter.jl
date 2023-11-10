@@ -48,7 +48,8 @@ Base.:/(n::Float64, p::KnotParameter) = n / p.p
 
 Return `count` KnotParameters evenly spaced between `from` and `to`.
 """
-function divide_interval(from::KnotParameter, to::KnotParameter, count::Integer)
+function divide_interval(from::KnotParameter, to::KnotParameter,
+                         count::Integer)::Vector{KnotParameter}
     delta = (to.p - from.p) / (count + 1)
     map(1:count) do i
         from + KnotParameter(i * delta)

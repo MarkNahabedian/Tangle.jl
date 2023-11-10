@@ -1,7 +1,9 @@
 using CubicSplines
 using Printf
 
-export Loop, operations, InitializeLoop, find_poi, next, previous, LoopSegmentsIterator
+export Loop, operations, InitializeLoop, find_poi
+export next, previous, before, after
+export LoopSegmentsIterator
 
 
 # Maybe rename Loop to Cord or Rope and specify locations for its endpoints.
@@ -164,6 +166,45 @@ previous(loop::Loop, poi::PointOfInterest) = previous(loop, poi.p)
 
 
 """
+    before(loop::Loop, label)
+    before(loop::Loop, poi::PointOfInterest)::KnotParameter
+
+Return a KnotParameter that comes before the specified
+`PointOfInterest` but after any previous points of interest.
+"""
+function before end
+
+
+"""
+    after(loop::Loop, label)
+    after(loop::Loop, poi::PointOfInterest)::KnotParameter
+
+Return a KnotParameter that comes after the specified
+`PointOfInterest` but before any succeeding points of interest.
+"""
+function after end
+
+
+before(loop::Loop, label) =
+    before(loop,
+           find_poi(loop) do poi
+               poi.label == label
+           end)
+
+before(loop::Loop, poi::PointOfInterest)::KnotParameter =
+    divide_interval(previous(loop, poi).p, poi.p, 2)[1]
+
+after(loop::Loop, label) =
+    after(loop,
+           find_poi(loop) do poi
+               poi.label == label
+           end)
+
+after(loop::Loop, poi::PointOfInterest)::KnotParameter =
+    divide_interval(poi.p, next(loop, poi).p, 2)[1]
+
+
+"""
     LoopSegmentsIterator(::Loop)
 
 Return an iterator for iterating over the segments of a Loop.
@@ -205,7 +246,8 @@ end
 
 
 function crosspoints(loop::Loop)
-    d = DefaultDict{Operation, Vector{PointOfInterest}}()
+    d = DefaultDict{Operation,
+                    Vector{PointOfInterest}}(Vector{PointOfInterest}())
     for poi in loop.poi
         if poi.is_crosspoint
             push!(d[poi.operation], poi)
@@ -215,7 +257,7 @@ function crosspoints(loop::Loop)
     for cp in values(d)
         @assert length(cp) == 2
         @assert cp[1].p < cp[2].p
-        push!(crosspoints, Crospoint(cp...))
+        push!(crosspoints, Crosspoint(cp...))
     end
     crosspoints
 end
