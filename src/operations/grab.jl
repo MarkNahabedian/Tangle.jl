@@ -22,26 +22,6 @@ was(op::Grab) = op.from_loop(op.at)
 
 
 """
-    grab(loop::Loop, at::KnotParameter, delta, label::Symbol)
-
-Return a new loop with a point of interest added between the one
-labeled `after` and the next point of interest after it.
-
-The new point of interest will be displaced by delta "outward".
-
-`label` provides a way to label or explain the reason for grabbing.
-"""
-function grab(loop::Loop, after::Symbol, delta, label::Symbol)
-    after_kp = find_poi(loop) do poi
-        poi.label == after
-    end.p
-    next_after_kp = next(loop, after_kp).p
-    at = (after_kp + next_after_kp) / 2
-    grab(loop, at, delta, label::Symbol)
-end
-
-
-"""
     grab(::Loop, ::KnotParameter, label, delta)
 
 Return a new Loop with a point of interest added at the specified
