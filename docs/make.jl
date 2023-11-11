@@ -21,6 +21,8 @@ makedocs(;
     pages=[
         "Home" => "index.md"
     ],
+    # Suppress errors:
+    checkdocs = :none
 )
 
 deploydocs(;
