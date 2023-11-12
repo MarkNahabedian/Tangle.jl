@@ -33,7 +33,6 @@ next
 previous
 before
 after
-Tangle.LoopSegmentIterator
 ```
 
 
@@ -70,9 +69,3 @@ Tangle.symbolic_vector
 Tangle.vsubs
 ```
 
-
-## Everything
-
-```@autodocs
-Modules = [ Tangle ]
-```
