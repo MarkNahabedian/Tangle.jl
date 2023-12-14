@@ -18,7 +18,7 @@ Symbolics = "0c5d862f-8b57-4792-8d23-62f2024744c7"
 [compat]
 CubicSplines = "0.2"
 DataStructures = "0.18"
-GR = "0.72"
+GR = "0.72, 0.73"
 MeshIO = "0.4"
 Plots = "1"
 StaticArrays = "1"
