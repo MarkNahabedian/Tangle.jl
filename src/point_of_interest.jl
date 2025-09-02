@@ -3,7 +3,7 @@ export Operation, PointOfInterest, coordinates, spatial_coordinates
 
 
 abstract type Operation
-# Evert Operation should have a field named "sequence" field that is
+# Every Operation should have a field named "sequence" that is
 # unique within a given Loop.
 end
 
