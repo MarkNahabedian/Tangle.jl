@@ -2,7 +2,13 @@
 export KnotParameter, KP, MIN_KnotParameter, MAX_KnotParameter
 
 """
-KnotParameter is a floating point number modulo 1.
+    KnotParameter(param::Float16)
+
+KnotParameter is a floating point value modulo 1.  It represents the
+parameter for a point on a parametric curve.
+
+`KnotParameter`s can be added and subtracted.  They can be multiplied
+by or divided by numbers.
 """
 struct KnotParameter
     p::Float16
