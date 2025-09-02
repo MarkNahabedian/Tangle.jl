@@ -66,7 +66,7 @@ next_operation_sequence_number(loop::Loop) =
               end,
               1)
 
-struct InitializeLoop <:Operation
+struct InitializeLoop <: Operation
     sequence
 
     InitializeLoop() = new(next_operation_sequence_number())
