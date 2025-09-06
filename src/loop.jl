@@ -24,7 +24,7 @@ where `loop` is a `Loop`.
 
 As a means of defining and representing knots, a Loop has a sorted
 set of "points of interest".  Each point of interest is just a
-specific value for the parameter `t`.
+specific value for the parameter `p`.
 """
 struct Loop
     poi::PointsOfInterest    # points of interest
