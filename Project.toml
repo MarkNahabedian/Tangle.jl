@@ -1,7 +1,7 @@
 name = "Tangle"
 uuid = "324d6a3d-8d47-4281-bb16-2f63593471e6"
-authors = ["MarkNahabedian <naha@mit.edu> and contributors"]
 version = "0.1.0"
+authors = ["MarkNahabedian <naha@mit.edu> and contributors"]
 
 [deps]
 CubicSplines = "9c784101-8907-5a6d-9be6-98f00873c89b"
