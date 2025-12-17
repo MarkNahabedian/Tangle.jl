@@ -1,4 +1,4 @@
-export distance, unit_vector
+export distance
 
 distance(v) = sqrt(sum(n -> n^2, v))
 
