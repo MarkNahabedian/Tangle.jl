@@ -66,7 +66,14 @@ function point_on_line(point, line::Line)::Bool
     d1 == d2 || d1 == - d2
 end
 
-function scalar_for_point(line::Line, point)
+
+"""
+    parameter_for_point(line::Line, point)
+
+Iff `point` is on `line`, returns the `parameter` for `line` such that
+`line(parameter) == point`.
+"""
+function parameter_for_point(line::Line, point)
     p = (point - line.point1) ./ 
         (line.point2 - line.point1)
     if all(x -> x == p[1], p)
@@ -83,7 +90,7 @@ defining points of that `Line` then return the parameter
 `p` such that `line(p) == point`, otherwise return nothing.
 """
 function point_in_segment(point, segment::Line)
-    s = scalar_for_point(segment, point)
+    s = parameter_for_point(segment, point)
     if s == nothing
         return nothing
     end
