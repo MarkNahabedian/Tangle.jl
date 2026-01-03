@@ -28,6 +28,7 @@ specific value for the parameter `p`.
 """
 struct Loop
     poi::PointsOfInterest    # points of interest
+    op::Operation            # The operation that created this Loop.
     # We cache the knot function here
     knot_function
 
@@ -42,10 +43,11 @@ struct Loop
             PointOfInterest(KnotParameter(0.75),  0.0, -1.0, 0.0, :south, op),
             # CubicSplines needs at least 5 data points:
             PointOfInterest(MAX_KnotParameter,  1.0,  0.0, 0.0, :closed, op)
-        ])
+        ],
+             op)
     end
     
-    function Loop(poi::PointsOfInterest)
+    function Loop(poi::PointsOfInterest, op::Operation)
         poi = sort(poi)
         values(fieldname) = map(p -> getfield(p, fieldname), poi)
         # ??? Do we need to explicitly repeat the first PointOfInterest?
@@ -53,7 +55,11 @@ struct Loop
         x = CubicSpline(p, values(:x))
         y = CubicSpline(p, values(:y))
         z = CubicSpline(p, values(:z))
-        new(poi, at -> [ x(at.p), y(at.p), z(at.p) ])
+        new(poi, op,
+            # A knot function which maps from a PointOfInterest to a Point:
+            at -> Point(x(at.p),
+                        y(at.p),
+                        z(at.p)))
     end
 end
 

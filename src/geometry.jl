@@ -1,10 +1,14 @@
 using LinearAlgebra
 using Symbolics
+import GeometryBasics
 using Symbolics: variable, substitute, solve_for
 
-# We can represent a point as a three element Julia Vector.
+# Our representation of a Point in 3 space:
+Point = GeometryBasics.Point{3, Float64}
 
-# We also represent a vector as a three element Julia Vector.
+# Sumtractiing tow GeometryBasics.Points gives another
+# GeometryBasics.Point, rather than something that is semantically a
+# vector.  Sigh.
 
 
 """
@@ -12,8 +16,8 @@ A Line is represented by two points on it.
 For a line segment, these points are the end points.
 """
 struct Line
-    point1::Vector
-    point2::Vector
+    point1::Point
+    point2::Point
 end
 
 

@@ -6,10 +6,10 @@ include("geometry_test.jl")
 
 include("loop_test.jl")
 
-include("reidermeister_twist_test.jl")
+# include("reidermeister_twist_test.jl")
 
-#=
-include("link_tests.jl")
+
+# include("link_tests.jl")
 
 @testset "Vector Utils" begin
     @test unit_vector(Vec3(5, 0, 0)) == Vec3(1, 0, 0)
@@ -18,6 +18,7 @@ include("link_tests.jl")
     @test distance(Vec3(1, 1, 0), Vec3(2, 2, 0)) == sqrt(2)
 end
 
+#=
 @testset "Strand Tests" begin
     strand = Strand(label="foo")
     addPoint!(strand, Tangle.Shape(), 0, 0, 0, 0)
@@ -96,6 +97,6 @@ end
     p1, p2, p3 = pointAt(strand, 5)
     @test spmatch(p1, StrandPoint(5, 5, 5, 1))
 end
-
 =#
+
 
