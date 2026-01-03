@@ -1,12 +1,5 @@
 
-export Operation, PointOfInterest, coordinates, spatial_coordinates
-
-
-abstract type Operation
-# Every Operation should have a field named "sequence" that is
-# unique within a given Loop.
-# Should every operation (except for InitializeLoop) have a previous Loop?
-end
+export PointOfInterest, coordinates, spatial_coordinates
 
 
 """
