@@ -8,9 +8,14 @@ include("utils.jl")
 include("symbolics_vector_variables.jl")
 include("geometry.jl")
 include("knot_parameter.jl")
+
 include("operations.jl")
+
 include("point_of_interest.jl")
 include("loop.jl")
+
+include("operations/AddPOI.jl")
+
 include("operations/grab.jl")
 include("operations/reidermeister_1.jl")
 include("show_loop.jl")

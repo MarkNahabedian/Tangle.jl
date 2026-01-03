@@ -13,6 +13,18 @@ end
     @test find_poi(poi -> poi.p == KnotParameter(0.5),loop).label == :west
 end
 
+@testset "AddPOI" begin
+    loop = Loop()
+    east = find_poi(poi -> poi.label == :east, loop)
+    north = find_poi(poi -> poi.label == :north, loop)
+    ne = (east.p + north.p) / 2
+    op = AddPOI(loop, ne, :northeast)
+    loop = op()
+    @test length(loop.poi) == 6
+    map(poi -> poi.label, loop.poi) ==
+        [ :east, :northeast, :north, :west, :south, :closed ]
+end
+
 @testset "next/previous in Loop" begin
     loop = Loop()
     @test length(loop.poi) == 5

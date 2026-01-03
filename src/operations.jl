@@ -20,7 +20,8 @@ next_op_sequence_number is used to assign a monotonically increasing
 sequence number to each new operation.
 """
 next_op_sequence_number = 
-let
+    let
+        # Should we use next_operation_sequence_number instead?
     seq::Int = 1
 
     function ()

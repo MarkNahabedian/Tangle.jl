@@ -65,3 +65,4 @@ distance(s::Segment) = distance(vector(s))
 vector(s::Segment) = s[2] - s[1]
 
 =#
+
