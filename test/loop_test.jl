@@ -28,11 +28,11 @@ end
 @testset "next/previous in Loop" begin
     loop = Loop()
     @test length(loop.poi) == 5
-    @test next(loop, MIN_KnotParameter).label == :north
-    @test previous(loop, MAX_KnotParameter).label == :south
+    @test next(loop, typemin(KnotParameter)).label == :north
+    @test previous(loop, typemax(KnotParameter)).label == :south
     # Test wrap-around:
-    @test next(loop, MAX_KnotParameter).label == :east
-    @test previous(loop, MIN_KnotParameter).label == :closed
+    @test next(loop, typemax(KnotParameter)).label == :east
+    @test previous(loop, typemin(KnotParameter)).label == :closed
 end
 
 @testset "LoopSegmentsIterator" begin
