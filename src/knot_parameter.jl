@@ -11,16 +11,16 @@ parameter for a point on a parametric curve.
 by or divided by numbers.
 """
 struct KnotParameter
-    p::Float16
+    p::Rational
 
     KnotParameter(p) = new(mod(p, 1))
 end
 
-Base.zero(::KnotParameter) = KnotParameter(zero(Float16))
-Base.zero(::Type{KnotParameter}) = KnotParameter(zero(Float16))
+Base.zero(::KnotParameter) = KnotParameter(zero(Rational))
+Base.zero(::Type{KnotParameter}) = KnotParameter(zero(Rational))
 
 Base.typemin(::Type{KnotParameter}) = KnotParameter(0)
-Base.typemax(::Type{KnotParameter}) = KnotParameter(prevfloat(Float16(1.0)))
+Base.typemax(::Type{KnotParameter}) = KnotParameter(999999//1000000)
 
 
 Base.rem(kp1::KnotParameter, kp2::KnotParameter) =
