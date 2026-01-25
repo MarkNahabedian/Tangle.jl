@@ -1,5 +1,5 @@
 
-export PointOfInterest, coordinates, spatial_coordinates
+export PointOfInterest, PointsOfInterest, coordinates, spatial_coordinates
 
 
 """
@@ -20,16 +20,16 @@ Currently, no code enforces these rules.
     p::KnotParameter
     # Should we use cylindrical coordinates instead?  Nah, there's
     # symetry in cartesean coordinates.
-    x::AbstractFloat
-    y::AbstractFloat
-    z::AbstractFloat
+    x::Real
+    y::Real
+    z::Real
     label
     operation::Operation
     is_crosspoint::Bool = false
 end
 
 PointOfInterest(p::KnotParameter,
-                x::AbstractFloat, y::AbstractFloat, z::AbstractFloat,
+                x::Real, y::Real, z::Real,
                 label, operation::Operation) =
                     PointOfInterest(p, x, y, z, label, operation, false)
 
