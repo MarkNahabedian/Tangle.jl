@@ -1,15 +1,15 @@
 
-export KnotParameterN, KnotParameter, divide_interval
+export KnotParameter, divide_interval
 
 #=
 
 KnotParameter is the type used as the parameter of a knot function.
 Since a knot function defines a loop, the domain of a knot function
-should identify points on a circular path.  This suggests using
-something like a subtype of Unsigned or integers mod some N as the
-domain.
+should identify points on a circular path.
 
-Avoid floating point numbers because they are not exact.
+Avoid floating point numbers because they are not exact.  A previous
+attempt to use subtypes of Unsigned also lead to inexact arithmetic
+when, for example, attempting to divide a KnotParameter by 3.
 
 WWhat do we want from arithmetic on knot parameters:
 
@@ -17,151 +17,84 @@ WWhat do we want from arithmetic on knot parameters:
 
 * isless, for sorting
 
+* exact arithmetic.
+
 * modular addition and subtraction.
 
-* division of the space between two knot parameters into a specified
-number of even intervals.
+* modular multiplication by an exact numeric.
 
-* convert of a KnotParameter to a fraction in the interval 0.0 to 1.0.
+* modular division of the space between two knot parameters into a
+specified number of even intervals.
+
+* convert of a KnotParameter to a fraction in the interval 0 <= kp < 1.
 
 For generating the symbolic parametric equations of a knot function,
-we can convert KnotParameter to a subtype of AbstractFloat or Rational
-first.
+we can just use the underlying Rational.
 
 =#
 
 
 """
-    KnotParameterN(param)
+    KnotParameter(param)
 
 KnotParameter serves as the parameter of a circular curve in 3 space.
 
 `KnotParameter`s can be added and subtracted.  They can be multiplied
-by or divided by numbers.
-
-If `param` is a real then it is taken mod 1 and scaled by typemax(T).
+by or divided by exact numbers.
 """
-struct KnotParameterN{T <: Unsigned}
-    p::T        # Using a UInt gives us automatic wrapped arithmetic
-                # and hopefully faster arithmetic.
+struct KnotParameter
+    p::Rational
 
-    KnotParameterN{T}(p::AbstractFloat) where T <: Unsigned =
-        KnotParameterN{T}(Int((typemax(T) + 1) * mod(p, 1.0)))
-
-    KnotParameterN{UInt128}(p::AbstractFloat) =
-        KnotParameterN{UInt128}((BigInt(typemax(UInt128)) + 1) * mod(p, 1.0))
-    
-    KnotParameterN{T}(p::Rational{I}) where {T <: Unsigned, I <: Signed} =
-        KnotParameterN{T}(round(Int,
-                                (typemax(T) + 1) * mod(p, 1)))
-
-    KnotParameterN{UInt128}(p::Rational{I}) where I <: Signed =
-        KnotParameterN{UInt128}(round(Int,
-                                (BigInt(typemax(UInt128)) + 1) * mod(p, 1)))
-
-    KnotParameterN{T}(p::Signed) where T <: Unsigned =
-        new{T}(T(typemax(T) & p))
-
-    KnotParameterN{T}(p::T) where T <: Unsigned =
-        new{T}(p)
+    KnotParameter(p::Rational) = new(mod(p, 1//1))
 end
 
-Base.zero(::KnotParameterN{T}) where T <: Unsigned = KnotParameterN{T}(zero(T))
-Base.zero(::Type{KnotParameterN{T}}) where T <: Unsigned = KnotParameterN{T}(zero(T))
+Base.zero(::KnotParameter) = KnotParameter(Rational(0))
+Base.zero(::Type{KnotParameter}) = KnotParameter(Rational(0))
 
-Base.typemin(::Type{KnotParameterN{T}}) where T <: Unsigned = KnotParameterN{T}(typemin(T))
-Base.typemax(::Type{KnotParameterN{T}}) where T <: Unsigned = KnotParameterN{T}(typemax(T))
+Base.typemin(T::Type{KnotParameter}) = zero(T)
+Base.typemax(T::Type{KnotParameter}) =
+    KnotParameter(Rational(1 - 1 // typemax(Int)))
 
+Base.isless(a::KnotParameter, b::KnotParameter) =
+    isless(a.p, b.p)
 
-Base.rem(kp1::KnotParameterN{T}, kp2::KnotParameterN{T}) where T <: Unsigned =
-    KnotParameterN(rem(kp1.p, kp2.p))
+Base.:+(p1::KnotParameter, p2::KnotParameter) =
+    KnotParameter(p1.p + p2.p)
 
-#=
-Base.Float64(kp::KnotParameterN{T}) where T <: Unsigned = Float64(kp.p / typemax(T))
-Base.Float32(kp::KnotParameterN{T}) where T <: Unsigned = Float32(kp.p / typemax(T))
-Base.Float16(kp::KnotParameterN{T}) where T <: Unsigned = Float64(kp.p / typemax(T))
-=#
+Base.:-(p1::KnotParameter, p2::KnotParameter) =
+    KnotParameter(p1.p - p2.p)
 
-Base.isless(a::KnotParameterN, b::KnotParameterN) = isless(a.p, b.p)
-
-Base.:+(p1::KnotParameterN{T}, p2::KnotParameterN{T}) where T <: Unsigned =
-    KnotParameterN{T}(p1.p + p2.p)
-
-Base.:-(p1::KnotParameterN{T}, p2::KnotParameterN{T}) where T <: Unsigned =
-    KnotParameterN{T}(p1.p - p2.p)    
-
-#=
-Base.://(p1::KnotParameterN{T}, p2::KnotParameterN{T}) where T <: Unsigned =
-    KnotParameterN{T}(p1.p // d)
-
-Base.:/(p1::KnotParameterN{T}, p2::KnotParameterN{T}) where T <: Unsigned =
-    KnotParameterN{T}(p1.p / d)
-=#
+Base.convert(::Type{<:Rational}, p::KnotParameter) = p.p
 
 
-Base.convert(::Type{<:Rational}, p::KnotParameterN{T}) where T <: Unsigned =
-    p.p // (1 + typemax(T))
+Base.:*(a::Integer, p::KnotParameter) =
+    KnotParameter(a * p.p)
+Base.:*(p::KnotParameter, a::Integer) =
+    KnotParameter(p.p * a)
+Base.:*(a::Rational, p::KnotParameter) =
+    KnotParameter(a * p.p)
+Base.:*(p::KnotParameter, a::Rational) =
+    KnotParameter(p.p * a)
 
-Base.convert(::Type{<:Rational}, p::KnotParameterN{UInt64}) =
-    p.p // (1 + BigInt(typemax(UInt64)))
+Base.://(p::KnotParameter, a::Integer) =
+    KnotParameter(p.p // a)
+Base.://(p::KnotParameter, a::Rational) =
+    KnotParameter(p.p // a)
 
-Base.convert(::Type{<:Rational}, p::KnotParameterN{UInt128}) =
-    p.p // (1 + BigInt(typemax(UInt128)))
+Base.:^(p::KnotParameter, e::Integer) =
+    KnotParameter(p.p ^ e)
 
-
-#=
-Base.convert(::Type{<:AbstractFloat}, p::KnotParameterN{T}) where T <: Unsigned =
-    p.p / (1 + BigInt(typemax(UInt64)))
-
-Base.convert(::Type{<:AbstractFloat}, p::KnotParameterN{UInt64}) =
-    p.p / (1 + BigInt(typemax(UInt64)))
-=#
-
-Base.:*(a::Signed, p::KnotParameterN{T}) where T <: Unsigned =
-    KnotParameterN{T}(a * p.p)
-Base.:*(p::KnotParameterN{T}, a::Signed) where T <: Unsigned =
-    KnotParameterN{T}(p.p * a)
-Base.:*(a::AbstractFloat, p::KnotParameterN{T}) where T <: Unsigned =
-    KnotParameterN{T}(a * convert(AbstractFloat, p))
-Base.:*(p::KnotParameterN{T}, a::AbstractFloat) where T <: Unsigned =
-    KnotParameterN{T}(convert(AbstractFloat, p) * a)
-Base.:*(a::Rational{I}, p::KnotParameterN{T}) where {T <: Unsigned, I <: Signed} =
-    KnotParameterN{T}(a * convert(Rational{I}, p))
-Base.:*(p::KnotParameterN{T}, a::Rational{I}) where {T <: Unsigned, I <: Signed} =
-    KnotParameterN{T}(convert(Rational{I}, p) * a)
-
-Base.://(p::KnotParameterN{T}, a::Integer) where {T <: Unsigned} =
-    KnotParameterN{T}(convert(Rational{Int128}, p) // a)
-Base.://(p::KnotParameterN{T}, a::Rational{I}) where {T <: Unsigned, I <: Signed} =
-    KnotParameterN{T}(convert(Rational{Int128}, p) // a)
-
-#=
-Base.:/(p::KnotParameterN{T}, n::AbstractFloat) where T <: Unsigned =
-    KnotParameterN{T}(convert(AbstractFloat, p) / n)
-=#
-
-Base.:^(p::KnotParameterN{T}, e::Real) where T <: Unsigned =
-    KnotParameterN{T}(convert(Rational{Int64}, p.p) ^ e)
-
-Base.isless(p::KnotParameterN{T}, e::Real) where T <: Unsigned =
-    isless(p.p, KnotParameterN{T}(e).p)
-Base.isless(e::Real, p::KnotParameterN{T}) where T <: Unsigned =
-    isless(KnotParameterN{T}(e).p, p.p)
 
 """
-    divide_interval(from::KnotParameterN, to::KnotParameterN, count::Integer)
+    divide_interval(from::KnotParameter, to::KnotParameter, count::Integer)
 
-Return `count` KnotParameterNs evenly spaced between `from` and `to`.
+Return `count` KnotParameters evenly spaced between `from` and `to`.
 """
-function divide_interval(from::KnotParameterN{T}, to::KnotParameterN{T},
-                         count::Integer)::Vector{KnotParameterN{T}} where T <: Unsigned
-    delta = convert(Rational{Int64}, to - from) // (count + 1)
+function divide_interval(from::KnotParameter, to::KnotParameter,
+                         count::Integer)::Vector{KnotParameter}
+    delta = ((to.p + ((from > to) ? 1 : 0)) - from.p) // (count + 1)
     map(1:count) do i
-        KnotParameterN{T}(convert(Rational, from) + i * delta)
+        KnotParameter(convert(Rational, from) + i * delta)
     end
 end
-
-
-# Pick an Unsigned size to use in most of our code:
-const KnotParameter = KnotParameterN{UInt16}
 
