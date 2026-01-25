@@ -37,10 +37,10 @@ struct Loop
         # We define some points of interest to give the Loop an
         # initial shape:
         Loop([
-            PointOfInterest(KnotParameter(0.0),   1.0,  0.0, 0.0, :east, op),
-            PointOfInterest(KnotParameter(0.25),  0.0,  1.0, 0.0, :north, op),
-            PointOfInterest(KnotParameter(0.5),  -1.0,  0.0, 0.0, :west, op),
-            PointOfInterest(KnotParameter(0.75),  0.0, -1.0, 0.0, :south, op),
+            PointOfInterest(KnotParameter(0//1),  1.0,  0.0, 0.0, :east, op),
+            PointOfInterest(KnotParameter(1//4),  0.0,  1.0, 0.0, :north, op),
+            PointOfInterest(KnotParameter(1//2), -1.0,  0.0, 0.0, :west, op),
+            PointOfInterest(KnotParameter(3//2),  0.0, -1.0, 0.0, :south, op),
             # CubicSplines needs at least 5 data points:
             PointOfInterest(typemax(KnotParameter),  1.0,  0.0, 0.0, :closed, op)
         ],
@@ -51,7 +51,9 @@ struct Loop
         poi = sort(poi)
         values(fieldname) = map(p -> getfield(p, fieldname), poi)
         # ??? Do we need to explicitly repeat the first PointOfInterest?
-        p = map(p -> p.p, values(:p))
+        # Loop is currently "closed" by adding the first point again
+        # but with a knot parameter that is just ess than 1.
+        p = map(kp -> Float64(kp.p), values(:p))
         x = CubicSpline(p, values(:x))
         y = CubicSpline(p, values(:y))
         z = CubicSpline(p, values(:z))

@@ -10,14 +10,14 @@ end
     loop = Loop()
     @test length(loop.poi) == 5
     @test find_poi(poi -> poi.label == :west, loop).label == :west
-    @test find_poi(poi -> poi.p == KnotParameter(0.5),loop).label == :west
+    @test find_poi(poi -> poi.p == KnotParameter(1//2), loop).label == :west
 end
 
 @testset "AddPOI" begin
     loop = Loop()
     east = find_poi(poi -> poi.label == :east, loop)
     north = find_poi(poi -> poi.label == :north, loop)
-    ne = (east.p + north.p) / 2
+    ne = (east.p + north.p) // 2
     op = AddPOI(loop, ne, :northeast)
     loop = op()
     @test length(loop.poi) == 6
