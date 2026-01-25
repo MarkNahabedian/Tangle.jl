@@ -1,7 +1,7 @@
 using LinearAlgebra
 using Symbolics
 import GeometryBasics
-using Symbolics: variable, substitute, solve_for
+using Symbolics: variable, substitute, symbolic_linear_solve
 
 # Our representation of a Point in 3 space:
 Point = GeometryBasics.Point{3, Float64}
@@ -125,7 +125,7 @@ function proximal_points(line1::Line, line2::Line)
     # for the closest points, v is perpendicular to both lines:
     dot1 = Equation(0, dot(v, direction_vector(line1)))
     dot2 = Equation(0, dot(v, direction_vector(line2)))
-    r_solved, s_solved = solve_for([dot1, dot2], [r, s])
+    r_solved, s_solved = symbolic_linear_solve([dot1, dot2], [r, s])
     return line1(r_solved), line2(s_solved)
 end
 
