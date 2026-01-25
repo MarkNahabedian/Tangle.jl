@@ -2,6 +2,15 @@ using Tangle
 using Test
 using LinearAlgebra
 
+@testset "Vector Utils" begin
+    @test unit_vector(Vec3(5, 0, 0)) == Vec3(1, 0, 0)
+    @test unit_vector(Vec3(0, 2, 0)) == Vec3(0, 1, 0)
+    @test unit_vector(Vec3(0, 0, 4)) == Vec3(0, 0, 1)
+    @test distance(Vec3(1, 1, 0), Vec3(2, 2, 0)) == sqrt(2)
+end
+
+include("test_knot_parameter.jl")
+
 include("geometry_test.jl")
 
 include("loop_test.jl")
@@ -11,12 +20,6 @@ include("loop_test.jl")
 
 # include("link_tests.jl")
 
-@testset "Vector Utils" begin
-    @test unit_vector(Vec3(5, 0, 0)) == Vec3(1, 0, 0)
-    @test unit_vector(Vec3(0, 2, 0)) == Vec3(0, 1, 0)
-    @test unit_vector(Vec3(0, 0, 4)) == Vec3(0, 0, 1)
-    @test distance(Vec3(1, 1, 0), Vec3(2, 2, 0)) == sqrt(2)
-end
 
 #=
 @testset "Strand Tests" begin
