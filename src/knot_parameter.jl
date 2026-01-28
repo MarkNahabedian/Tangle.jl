@@ -45,6 +45,8 @@ by or divided by exact numbers.
 struct KnotParameter
     p::Rational
 
+    # Maybe if p is explicitly 1//1 we should allow it as the "end
+    # point"?  This would avoid all of the typemax kludgery.
     KnotParameter(p::Rational) = new(mod(p, 1//1))
 end
 
@@ -57,6 +59,8 @@ Base.typemax(T::Type{KnotParameter}) =
 
 Base.isless(a::KnotParameter, b::KnotParameter) =
     isless(a.p, b.p)
+
+
 
 Base.:+(p1::KnotParameter, p2::KnotParameter) =
     KnotParameter(p1.p + p2.p)
@@ -81,8 +85,15 @@ Base.://(p::KnotParameter, a::Integer) =
 Base.://(p::KnotParameter, a::Rational) =
     KnotParameter(p.p // a)
 
+# We need an exponentiation operator for the symbolic cubic splines
+# code:
 Base.:^(p::KnotParameter, e::Integer) =
-    KnotParameter(p.p ^ e)
+    # Avoid overflow:
+    if p == typemax(KnotParameter)
+        return 1//1
+    else
+        return p.p
+    end
 
 
 """
