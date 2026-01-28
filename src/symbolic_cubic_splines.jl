@@ -24,7 +24,7 @@ evaluation if necessary.
 
 =#
 
-SYMBOLIC_CUBIC_SPLINES_FOLD = false
+SYMBOLIC_CUBIC_SPLINES_FOLD = true
 
 function symbolic_cubic_spline(points, looped::Bool)
     coefficients = Num[]
@@ -119,6 +119,23 @@ function symbolic_cubic_spline(points, looped::Bool)
     make_ifelse(1)
 end
 
+
+#=
+getvar(expr, v::Symbol) = first(filter(x -> x.name == v,
+                                       collect(union(Set(),
+                                                     map(Symbolics.get_variables, EQUATIONS)...))))
+=#
+
+getvar(expr, v::Symbol) = first(filter(x -> x.name == v,
+                                       Symbolics.get_variables(expr)))
+
+#=
+getvar(exprs::Vector{Num}, v::Symbol) = first(filter(x -> x.name == v,
+                                            union(Set(), map(Symbolics.get_variables, (exprs))...)))
+=#
+
+
+
 symbolic_cubic_spline(loop::Loop) = symbolic_cubic_spline(loop.poi)
 
 function symbolic_cubic_spline(poi::PointsOfInterest)
@@ -201,14 +218,30 @@ function find_crossings(projection)
     =#
     @variables p1, p2
     kp = getvar(projection, :kp)
-    eq = substitute(projection, Dict(kp => p1); fold = SYMBOLIC_CUBIC_SPLINES_FOLD) ~
-        substitute(projection, Dict(kp => p2); fold = SYMBOLIC_CUBIC_SPLINES_FOLD)
-    # But these equations are not linear, they're cubic.
+    # Solution generated with the assistance of Google Gemini (Google LLC, 2025).
+    # Reference: https://gemini.google.com
+    #
+    # Google Gemeni says that from our cubic equation we can factor out
+    # (p1 - p2).  The constant terms already cancel since they're the
+    # same on both side of the equation.
+    #
+    # We can then use symbolic_solve.
+    eq = [0, 0, 0] ~
+        ((substitute(projection, Dict(kp => p1); fold = SYMBOLIC_CUBIC_SPLINES_FOLD) -
+          substitute(projection, Dict(kp => p2); fold = SYMBOLIC_CUBIC_SPLINES_FOLD)) /
+        (p1 - p2))
+    println(eq)
+    println(typeof(eq))
+    symbolic_solve(eq, [p1, p2])
+    # The above fails an assertion in check_expr_validity, which doesn't support ifelse.
 
-    # Also, for multiple crossings we hpe for multiple solutions.  Do
+    # Also, for multiple crossings we hope for multiple solutions.  Do
     # we need to try to solve an equation for the cross-product of the
     # loop segments?
 end
+
+# find_crossings(one_crossing_projection)
+
 
 
 ##### Debugging
@@ -228,18 +261,4 @@ function few_unknowns(e = equations)
     filter(e -> 0 < length(Symbolics.get_variables(e[2])) <= 2,
            collect(enumerate(e)))
 end
-
-#=
-getvar(expr, v::Symbol) = first(filter(x -> x.name == v,
-                                       collect(union(Set(),
-                                                     map(Symbolics.get_variables, EQUATIONS)...))))
-=#
-
-getvar(expr, v::Symbol) = first(filter(x -> x.name == v,
-                                       Symbolics.get_variables(expr)))
-
-#=
-getvar(exprs::Vector{Num}, v::Symbol) = first(filter(x -> x.name == v,
-                                            union(Set(), map(Symbolics.get_variables, (exprs))...)))
-=#
 
