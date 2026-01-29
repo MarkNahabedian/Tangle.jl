@@ -27,7 +27,7 @@ evaluation if necessary.
 SYMBOLIC_CUBIC_SPLINES_FOLD = true
 
 function symbolic_cubic_spline(points, looped::Bool)
-    coefficients = Num[]
+    coefficient_vars = Num[]
     equations = []
     polynomials = []
     massage_kp(kp) =
@@ -45,7 +45,7 @@ function symbolic_cubic_spline(points, looped::Bool)
         b = Symbolics.variable("b$i")
         c = Symbolics.variable("c$i")
         d = Symbolics.variable("d$i")
-        push!(coefficients, a, b, c, d)
+        push!(coefficient_vars, a, b, c, d)
         polynomial = a * kp ^ 3 + b * kp ^ 2 + c * kp + d
         push!(polynomials, polynomial)
         # points[i] is a solutiion to polynomial:
@@ -98,12 +98,15 @@ function symbolic_cubic_spline(points, looped::Bool)
     # Solve for the coefficients of the polymomials:
     global EQUATIONS = equations
     println("\n*** equations:  ", equations)
-    coefficients = OrderedDict(zip(coefficients,
-                                   symbolic_linear_solve(equations, coefficients)))
+    coefficients = OrderedDict(map(t -> Pair(t...),
+                                   zip(coefficient_vars,
+                                       symbolic_linear_solve(equations,
+                                                             coefficient_vars))))
     println("\n*** coefficients:  ", coefficients)      # IT LOOKS LIKE WE'RE NOT SOLVING THE COEFFICIENTS.  They're all Nan.
     # Substitute the coefficients into the polynomials:
     polynomials = map(polynomials) do p
-        substitute(p, coefficients; fold = SYMBOLIC_CUBIC_SPLINES_FOLD)
+        # substitute doesn't work with OrderedDict:
+        substitute(p, Dict(coefficients); fold = SYMBOLIC_CUBIC_SPLINES_FOLD)
     end
     function make_ifelse(i)
         if i == length(polynomials)
@@ -149,6 +152,13 @@ function symbolic_cubic_spline(poi::PointsOfInterest)
 end
 
 
+#=
+function functionize(name::String, expr)
+    kp = getvar(expr, :kp)
+    f = Symbolics.variable("$name()")
+=#
+
+
 """
     project(plane, f)
 
@@ -164,6 +174,7 @@ function project(plane, f)
     plane = plane ./ LinearAlgebra.norm(plane)
     f - plane .* sum(plane .* f)
 end
+
 
 struct NoOp <: Operation
 end
@@ -243,6 +254,12 @@ end
 # find_crossings(one_crossing_projection)
 
 
+# What if insead we try to find crossings by computing the distance
+# between the knot function points for two different values and then minimizing it.
+# Minimize sum((knot(kp1) - knot(kp2)) .^2).
+
+
+
 
 ##### Debugging
 
@@ -261,4 +278,5 @@ function few_unknowns(e = equations)
     filter(e -> 0 < length(Symbolics.get_variables(e[2])) <= 2,
            collect(enumerate(e)))
 end
+
 
