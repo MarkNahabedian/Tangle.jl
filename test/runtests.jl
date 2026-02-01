@@ -81,13 +81,13 @@ end
     @test maxThickness(strands...) == 2
 end
 
-@testset "StrandPoints center" begin
+@testset "StrandPoints centroid" begin
     strand = Strand()
     addPoint!(strand, Tangle.Shape(), 1, 0, 0, -1)
     addPoint!(strand, Tangle.Shape(), 2, 0, 2, -1)
     addPoint!(strand, Tangle.Shape(), 3, 2, 2, 1)
     addPoint!(strand, Tangle.Shape(), 4, 2, 0, 1)
-    @test spmatch(center(strand.points...), StrandPoint(2.5, 1.0, 1.0, 0.0))
+    @test spmatch(centroid(strand.points...), StrandPoint(2.5, 1.0, 1.0, 0.0))
 end
 
 @testset "pointAt" begin

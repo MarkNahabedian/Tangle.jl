@@ -82,17 +82,17 @@ end
 
 
 """
-    center(points)
+    centroid(points)
 
 Return the point at the center of the collection of points.
 """
-function center end
+function centroid end
 
-center(points::Vector{<:Real}...) =
+centroid(points::Vector{<:Real}...) =
     reduce(+, points) / length(points)
 
-center(loop::Loop) =
-    center(map(spatial_coordinates, loop.poi)...)
+centroid(loop::Loop) =
+    centroid(map(spatial_coordinates, loop.poi)...)
 
 
 struct Crosspoint
