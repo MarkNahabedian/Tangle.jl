@@ -48,6 +48,9 @@ coordinates(poi::PointOfInterest) =
 spatial_coordinates(poi::PointOfInterest) =
     [ poi.x, poi.y, poi.z ]
 
+spatial_coordinates(poi::PointsOfInterest) =
+    map(spatial_coordinates, poi)
+
 function spatial_coordinates(point::Vector)
     # ??? Should we verify the element types?
     if length(point) == 3
