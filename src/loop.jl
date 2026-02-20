@@ -1,7 +1,7 @@
 using CubicSplines
 using Printf
 
-export Loop, operations, InitializeLoop, find_poi
+export Loop, operations, InitializeLoop, find_poi, centroid
 export next, previous, before, after
 export LoopSegmentsIterator
 
