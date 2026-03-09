@@ -1,9 +1,17 @@
 # SOme utilities for showing and diagnosing Loops.
 
-using Plots: plot, plot!, annotate!
+using DataFrames
+using Plots: plot, plot!, annotate!, savefig
 
-export show_points, flat_graph_loop, graph_loop
+export show_points, loop_points_dataframe, loop_points_for_graph,
+    flat_graph_loop, graph_loop
 
+
+"""
+    show_points(loop::Loop)
+
+Print a listing of the `Loop`'s points of interest.
+"""
 function show_points(loop::Loop)
     println()
     for poi in loop.poi
@@ -13,18 +21,61 @@ function show_points(loop::Loop)
     println()
 end
 
-function loop_points_for_graph(loop::Loop, steps_between_poi)
-    kps = Set()
-    for poi in loop.poi
-        npoi = next(loop, poi)
-        for f in (poi.p.p) : ((npoi.p.p - poi.p.p) / steps_between_poi) : (npoi.p.p)
-            push!(kps, KnotParameter(f))
+"""
+    loop_points_dataframe(::Loop, steps_between_poi::Int)
+
+Returns a DataFrame of (p, x, y, z) of the PointsofInterest of the
+`Loop` with steps_between_poi points intercolated in between.
+"""
+function loop_points_dataframe(loop::Loop, steps_between_poi::Int)
+    df = DataFrame(
+        p = fieldtype(fieldtype(PointOfInterest, :p), :p)[],
+        x = fieldtype(PointOfInterest, :x)[],
+        y = fieldtype(PointOfInterest, :y)[],
+        z = fieldtype(PointOfInterest, :z)[])
+    for i in 1 : (length(loop.poi) - 1)
+        poi1 = loop.poi[i]
+        poi2 = loop.poi[i+1]
+        push!(df, (poi1.p.p, poi1.x, poi1.y, poi1.z))
+        incr = ((poi2.p^1) - poi1.p.p) // (steps_between_poi + 1)
+        for p in (poi1.p.p + incr) : incr : ((poi2.p^1) - incr)
+            x, y, z = loop.knot_function(p)
+            @assert typeof(p) <: eltype(df.p)
+            @assert typeof(x) <: eltype(df.x)
+            @assert typeof(y) <: eltype(df.y)
+            @assert typeof(z) <: eltype(df.z)
+            push!(df, (p, x, y, z))
         end
     end
-    return map(sort(collect(kps))) do kp
-        spatial_coordinates(loop(kp))
+    poiz = last(loop.poi)
+    push!(df, (poiz.p, poiz.x, poiz.y, poiz.z))
+    df
+end
+
+
+"""
+    loop_points_for_graph(loop::Loop, steps_between_poi)
+
+Returns a list of spatial coordinates of the points of interest of
+`loop` and `steps_between_poi` points interpolated in between, ordered
+by knot parameter.
+"""
+function loop_points_for_graph(loop::Loop, steps_between_poi)
+    params = Rational[]    # Real[]
+    for i in 1 : (length(loop.poi) - 1)
+        poi1 = loop.poi[i]
+        poi2 = loop.poi[i+1]
+        push!(params, poi1.p)
+        incr = ((poi2.p^1) - poi1.p.p) // (steps_between_poi + 1)
+        for p in (poi1.p.p + incr) : incr : ((poi2.p^1) - incr)
+            push!(params, p)
+        end
+    end
+    return map(sort(params)) do p
+        loop.knot_function(p)
     end
 end
+
 
 function flat_graph_loop(loop::Loop; steps_between_poi=4)
     points = loop_points_for_graph(loop, steps_between_poi)
@@ -37,15 +88,17 @@ function flat_graph_loop(loop::Loop; steps_between_poi=4)
         x = map(poi -> poi.x, loop.poi)
         y = map(poi -> poi.y, loop.poi)
         labels = map(poi -> string(poi.label), loop.poi)
-        plot!(x, y,
+        plot!(plt, x, y,
               background = :black,
               linewidth = 0,
               markershape = :circle)
         annotate!(x, y, labels)
     end
+    plt
 end
 
-function graph_loop(loop::Loop; steps_between_poi=4)
+function graph_loop(loop::Loop; steps_between_poi=4,
+                    filename=nothing)
     points = loop_points_for_graph(loop, steps_between_poi)
     plt = plot(map(p -> p[1], points),
                map(p -> p[2], points),
@@ -58,12 +111,16 @@ function graph_loop(loop::Loop; steps_between_poi=4)
         y = map(poi -> poi.y, loop.poi)
         z = map(poi -> poi.z, loop.poi)
         labels = map(poi -> string(poi.label), loop.poi)
-        plot!(x, y, z,
+        plot!(plt, x, y, z,
               background = :black,
               linewidth = 0,
               markershape = :circle)
         annotate!(x, y, z, labels)
     end
+    if filename != nothing
+        savefig(filename)
+    end
+    plt
 end
 
 
