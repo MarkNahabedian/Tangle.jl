@@ -1,4 +1,4 @@
-export Operation, next_op_sequence_number
+export Operation, next_op_sequence_number, NoOp
 
 
 """
@@ -12,6 +12,7 @@ abstract type Operation
 # unique within a given Loop.
 # Should every operation (except for InitializeLoop) have a previous Loop?
 end
+
 
 """
     next_op_sequence_number()
@@ -31,4 +32,12 @@ next_op_sequence_number =
     end
 end
 
+
+"""
+    NoOp
+
+An opepration type for when you can't be botheredd to identify the
+operation being performed.
+"""
+struct NoOp <: Operation end
 
