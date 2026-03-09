@@ -50,6 +50,8 @@ struct KnotParameter
     KnotParameter(p::Rational) = new(mod(p, 1//1))
 end
 
+Base.convert(::Type{Rational}, kp::KnotParameter) = kp.p
+
 Base.zero(::KnotParameter) = KnotParameter(Rational(0))
 Base.zero(::Type{KnotParameter}) = KnotParameter(Rational(0))
 
