@@ -52,16 +52,14 @@ struct Loop
         values(fieldname) = map(p -> getfield(p, fieldname), poi)
         # ??? Do we need to explicitly repeat the first PointOfInterest?
         # Loop is currently "closed" by adding the first point again
-        # but with a knot parameter that is just ess than 1.
+        # but with a knot parameter that is just less than 1.
         p = map(kp -> Float64(kp.p), values(:p))
         x = CubicSpline(p, values(:x))
         y = CubicSpline(p, values(:y))
         z = CubicSpline(p, values(:z))
         new(poi, op,
             # A knot function which maps from a PointOfInterest to a Point:
-            at -> Point(x(at.p),
-                        y(at.p),
-                        z(at.p)))
+            p::Real -> Point(x(p), y(p), z(p)))
     end
 end
 
@@ -122,6 +120,10 @@ This function should be continuous and defined by the specified points
 of interest.
 """
 function (loop::Loop)(p::KnotParameter)
+    loop.knot_function(p)
+end
+
+function (loop::Loop)(p::Rational)
     loop.knot_function(p)
 end
 

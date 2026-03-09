@@ -21,7 +21,7 @@ end
 
 function (op::AddPOI)()
     poi = PointOfInterest(op.at,
-                          op.from_loop.knot_function(op.at)...,
+                          op.from_loop.knot_function(op.at.p)...,
                           op.label,
                           op)
     Loop([ poi, op.from_loop.poi...], op)
