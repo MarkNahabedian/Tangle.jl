@@ -1,4 +1,4 @@
-mport bpy
+import bpy
 import json
 import sys
 
