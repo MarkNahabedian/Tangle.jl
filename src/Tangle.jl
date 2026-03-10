@@ -19,6 +19,7 @@ include("operations/AddPOI.jl")
 include("operations/grab.jl")
 include("operations/reidermeister_1.jl")
 include("show_loop.jl")
+include("blender/blender_render_loop.jl")
 
 include("vector_utils.jl")
 # include("strand.jl")

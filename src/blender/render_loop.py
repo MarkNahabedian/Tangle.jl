@@ -1,6 +1,7 @@
 import bpy
 import json
 import sys
+from pathlib import Path
 
 # Get coordinates from Julia (passed after the '--' flag)
 data_path = sys.argv[-1]
@@ -25,5 +26,5 @@ obj = bpy.data.objects.new("Path", curve_data)
 bpy.context.collection.objects.link(obj)
 
 # Save result
-bpy.ops.wm.save_as_mainfile(filepath="output.blend")
+bpy.ops.wm.save_as_mainfile(filepath=str(Path(data_path).with_suffix(".blend")))
 
