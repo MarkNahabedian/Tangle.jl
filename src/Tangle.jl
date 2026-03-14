@@ -2,6 +2,9 @@ module Tangle
 
 using DataStructures
 using InteractiveUtils
+using CoordinateTransformations
+using CoordinateTransformations: LinearMaps
+using Rotations
 import StaticArrays
 
 include("utils.jl")
@@ -20,6 +23,7 @@ include("operations/grab.jl")
 include("operations/reidermeister_1.jl")
 include("show_loop.jl")
 include("blender/blender_render_loop.jl")
+include("blender/test_loops.jl")
 
 include("vector_utils.jl")
 # include("strand.jl")
