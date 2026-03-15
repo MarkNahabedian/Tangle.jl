@@ -13,7 +13,7 @@ export LoopSegmentsIterator
 
 A Loop represents a mathematical knot.
 
-In one sense, it is a function in some parameter `p` (a KnotParameter)
+In one sense, it is a function in some parameter `p` (a [KnotParameter](@ref))
 that returns a point in R3 for `p`.
 
 ```
