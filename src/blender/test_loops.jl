@@ -1,48 +1,60 @@
+export UNKNOT, ONE_CROSSING, THREE_LINKED_LOOPS
+
+UNKNOT = Loop()
+
+blender_render_loops(StyledLoop("unknot", UNKNOT, (0, 1, 1, 1), 0.2),
+                     "unknot";
+                     steps_between_poi=8)
 
 ### One Crossing:
 
-one_crossing =
-    let
-        op = NoOp()
-        Loop([
-            PointOfInterest(KnotParameter(0//8),     -2,  0,  0,   :left, op),
-            PointOfInterest(KnotParameter(1//8),     -1,  1,  0,   :point2, op),
-            PointOfInterest(KnotParameter(2//8),      0,  0,  1/2, :cross1a, op),
-            PointOfInterest(KnotParameter(3//8),      1, -1,  0,   :point4, op),
-            PointOfInterest(KnotParameter(4//8),      2,  0,  0,   :right, op),
-            PointOfInterest(KnotParameter(5//8),      1,  1,  0,   :point6, op),
-            PointOfInterest(KnotParameter(6//8),      0,  0, -1/2, :cross1b, op),
-            PointOfInterest(KnotParameter(7//8),     -1, -1,  0,   :point8, op),
-            PointOfInterest(typemax(KnotParameter), -2,  0,  0,   :end, op)
-        ], op)
-    end
+ONE_CROSSING =
+    StyledLoop("one_crossing",
+               let
+                   op = NoOp()
+                   Loop([
+                       PointOfInterest(KnotParameter(0//8),     -2,  0,  0,   :left, op),
+                       PointOfInterest(KnotParameter(1//8),     -1,  1,  0,   :point2, op),
+                       PointOfInterest(KnotParameter(2//8),      0,  0,  1/2, :cross1a, op),
+                       PointOfInterest(KnotParameter(3//8),      1, -1,  0,   :point4, op),
+                       PointOfInterest(KnotParameter(4//8),      2,  0,  0,   :right, op),
+                       PointOfInterest(KnotParameter(5//8),      1,  1,  0,   :point6, op),
+                       PointOfInterest(KnotParameter(6//8),      0,  0, -1/2, :cross1b, op),
+                       PointOfInterest(KnotParameter(7//8),     -1, -1,  0,   :point8, op),
+                       PointOfInterest(typemax(KnotParameter), -2,  0,  0,   :end, op)
+                   ], op)
+               end,
+               (0, 1, 0, 1),
+               0.2)
 
-ocsl = StyledLoop("one_crossing",
-                  one_crossing,
-                  (0, 1, 0, 1),
-                  0.2)
-
-# blender_render_loops(ocsl, "one_crossing_styled")
+blender_render_loops(ONE_CROSSING, "one_crossing")
 
 
 ### Three Linked Loops:
 
-three_linked_loops = let
+THREE_LINKED_LOOPS = let
     tilted = let
         # PointsOfInterest for a flat unit circle:
         unit_circle = let
-            knot_parameters = [ map(n -> KnotParameter(n//4), 0:3)...,
-                                typemax(KnotParameter) ]
-            labels = ["start", "1stQuarter", "halfway", "3rdQuarter", "end"]
+            knot_parameters = map(n -> KnotParameter(n//4), 0:3)
+            labels = ["start", "1stQuarter", "halfway", "3rdQuarter"]
             unit_circle = map(knot_parameters) do kp
                 a = float(kp.p) * 2 * pi
                 [ cos(a), sin(a), 0 ]
             end
-            map(zip(knot_parameters, unit_circle, labels)) do (kp, xyz, label)
-                PointOfInterest(kp, xyz..., label, NoOp(), false)
-            end
+            [ map(zip(knot_parameters, unit_circle, labels)) do (kp, xyz, label)
+                 PointOfInterest(kp, xyz..., label, NoOp(), false)
+              end...,
+              PointOfInterest(typemax(KnotParameter),
+                              unit_circle[1]...,
+                              "end",
+                              NoOp(),
+                              false)
+              ]
         end
-        map(LinearMap(RotY(pi / 6)), unit_circle)
+        println("unit_circle:\n", unit_circle)
+        # PointsOfInterest for a tilted unit circle:
+        map(LinearMap(RotY(pi / 4)), unit_circle)
     end
     diameter = 0.1
     operation = NoOp()
@@ -52,16 +64,14 @@ three_linked_loops = let
                [ 0, 0, 1, 1 ] ]
     rotations = map(angle -> LinearMap(RotZ(angle)),
                     2 * pi * (0:2) / 3 )
-    tl = Translation(0.3, 0.3, 0)
+    tl = Translation(0.25, 0.25, 0)
     map(zip(names, rotations, colors)) do (name, zrot, color)
         loop = Loop((zrot ∘ tl).(tilted), operation)
         StyledLoop(name, loop, color, diameter)
     end
 end
 
-# blender_render_loops(Tangle.three_linked_loops, "three_linked_loops")
-
-
+blender_render_loops(THREE_LINKED_LOOPS, "three_linked_loops")
 
 
 #=
