@@ -61,13 +61,11 @@ Returns a list of spatial coordinates of the points of interest of
 by knot parameter.
 """
 function loop_points_for_graph(loop::Loop, steps_between_poi)
-    println("loop_points_for_graph")
     params = Rational[]    # Real[]
     for i in 1 : (length(loop.poi) - 1)
         poi1p = loop.poi[i].p.p
         poi2p = loop.poi[i+1].p^1    # Deal with typemax(::KnotParameter)
         incr = (poi2p - poi1p) // (steps_between_poi + 1)
-        println("\t$poi1p, $poi2p, incr = $incr")
         for p in poi1p : incr : poi2p
             push!(params, p)
         end
