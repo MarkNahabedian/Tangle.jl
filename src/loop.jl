@@ -40,7 +40,7 @@ struct Loop
             PointOfInterest(KnotParameter(0//1),  1.0,  0.0, 0.0, :east, op),
             PointOfInterest(KnotParameter(1//4),  0.0,  1.0, 0.0, :north, op),
             PointOfInterest(KnotParameter(1//2), -1.0,  0.0, 0.0, :west, op),
-            PointOfInterest(KnotParameter(3//2),  0.0, -1.0, 0.0, :south, op),
+            PointOfInterest(KnotParameter(3//4),  0.0, -1.0, 0.0, :south, op),
             # CubicSplines needs at least 5 data points:
             PointOfInterest(typemax(KnotParameter),  1.0,  0.0, 0.0, :closed, op)
         ],
