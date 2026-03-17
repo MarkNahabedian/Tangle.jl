@@ -60,6 +60,39 @@ function spatial_coordinates(point::Vector)
     end
 end
 
+# Integration with CoordinateTransformations (indexing of coordinates):
+
+Base.length(p::PointOfInterest) = 3
+Base.size(p::PointOfInterest) = (3,)
+
+function Base.getindex(p::PointOfInterest, index::Int)
+    if index == 1
+        return p.x
+    elseif index == 2
+        return p.y
+    elseif index == 3
+        return p.z
+    else
+        throw(BoundsError(p, index))
+    end
+end
+
+# We might find we need more methods for subtypes of Transformation.
+
+(t::LinearMap)(poi::PointOfInterest) =
+    PointOfInterest(poi.p,
+                    t(spatial_coordinates(poi))...,
+                    poi.label,
+                    poi.operation,
+                    poi.is_crosspoint)
+
+(t::Translation)(poi::PointOfInterest) =
+    PointOfInterest(poi.p,
+                    t(spatial_coordinates(poi))...,
+                    poi.label,
+                    poi.operation,
+                    poi.is_crosspoint)
+
 #=
 const Segment = Tuple{PointOfInterest,PointOfInterest}
 
