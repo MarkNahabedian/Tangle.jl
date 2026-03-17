@@ -2,9 +2,11 @@ export UNKNOT, ONE_CROSSING, THREE_LINKED_LOOPS
 
 UNKNOT = Loop()
 
-blender_render_loops(StyledLoop("unknot", UNKNOT, (0, 1, 1, 1), 0.2),
-                     "unknot";
-                     steps_between_poi=8)
+if !is_running_on_github()
+    blender_render_loops(StyledLoop("unknot", UNKNOT, (0, 1, 1, 1), 0.2),
+                         "unknot";
+                         steps_between_poi=8)
+end
 
 ### One Crossing:
 
@@ -27,7 +29,9 @@ ONE_CROSSING =
                (0, 1, 0, 1),
                0.2)
 
-blender_render_loops(ONE_CROSSING, "one_crossing")
+if !is_running_on_github()
+    blender_render_loops(ONE_CROSSING, "one_crossing")
+end
 
 
 ### Three Linked Loops:
@@ -71,7 +75,9 @@ THREE_LINKED_LOOPS = let
     end
 end
 
-blender_render_loops(THREE_LINKED_LOOPS, "three_linked_loops")
+if !is_running_on_github()
+    blender_render_loops(THREE_LINKED_LOOPS, "three_linked_loops")
+end
 
 
 #=

@@ -7,6 +7,11 @@ using CoordinateTransformations: LinearMaps
 using Rotations
 import StaticArrays
 
+export is_running_on_github
+
+is_running_on_github() = get(ENV, "CI", "false") == "true"
+
+
 include("utils.jl")
 include("symbolics_vector_variables.jl")
 include("geometry.jl")
