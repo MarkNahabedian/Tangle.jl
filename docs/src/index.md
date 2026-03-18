@@ -48,7 +48,7 @@ reidemeisterTwist
 ## Geometry
 
 ```@docs
-center
+centroid
 Tangle.Line
 Tangle.direction_vector
 Tangle.unit_direction_vector
