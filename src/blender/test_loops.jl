@@ -2,11 +2,6 @@ export UNKNOT, ONE_CROSSING, THREE_LINKED_LOOPS
 
 UNKNOT = Loop()
 
-if !is_running_on_github()
-    blender_render_loops(StyledLoop("unknot", UNKNOT, (0, 1, 1, 1), 0.2),
-                         "unknot";
-                         steps_between_poi=8)
-end
 
 ### One Crossing:
 
@@ -73,10 +68,6 @@ THREE_LINKED_LOOPS = let
         loop = Loop((zrot ∘ tl).(tilted), operation)
         StyledLoop(name, loop, color, diameter)
     end
-end
-
-if !is_running_on_github()
-    blender_render_loops(THREE_LINKED_LOOPS, "three_linked_loops")
 end
 
 

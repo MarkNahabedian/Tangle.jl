@@ -15,6 +15,16 @@ include("geometry_test.jl")
 
 include("loop_test.jl")
 
+@testset "test blender rendering" begin
+    if !is_running_on_github()
+        blender_render_loops(StyledLoop("unknot", UNKNOT, (0, 1, 1, 1), 0.2),
+                             "unknot";
+                             steps_between_poi=8)
+        blender_render_loops(ONE_CROSSING, "one_crossing")
+        blender_render_loops(THREE_LINKED_LOOPS, "three_linked_loops")
+    end
+end
+
 # include("reidermeister_twist_test.jl")
 
 
