@@ -4,9 +4,9 @@ import GeometryBasics
 using Symbolics: variable, substitute, symbolic_linear_solve
 
 # Our representation of a Point in 3 space:
-Point = GeometryBasics.Point{3, Float64}
+const Point = GeometryBasics.Point{3, Real}
 
-# Sumtractiing tow GeometryBasics.Points gives another
+# Sumbractiing two GeometryBasics.Points gives another
 # GeometryBasics.Point, rather than something that is semantically a
 # vector.  Sigh.
 
@@ -15,10 +15,13 @@ Point = GeometryBasics.Point{3, Float64}
 A Line is represented by two points on it.
 For a line segment, these points are the end points.
 """
-struct Line
-    point1::Point
-    point2::Point
-end
+const Line = GeometryBasics.Line{3, Real}
+Line(point1::Point, point2::Point) = Line([point1, point2])
+Line(point1::Vector{<:Real}, point2::Vector{<:Real}) =
+    Line([Point(point1...), Point(point2...)])
+Base.getproperty(line::Line, ::Val{:point1}) = line.points[1]
+Base.getproperty(line::Line, ::Val{:point2}) = line.points[2]
+@property_trampolines Line
 
 
 """
@@ -42,9 +45,8 @@ unit_direction_vector(line::Line) =
 A Line can be treated as a parametric function to identify
 some point on the line.
 """
-function (line::Line)(parameter)::Vector
+(line::Line)(parameter::Real)::Vector =
     line.point1 + parameter * direction_vector(line)
-end
 
 
 """
@@ -126,6 +128,6 @@ function proximal_points(line1::Line, line2::Line)
     dot1 = Equation(0, dot(v, direction_vector(line1)))
     dot2 = Equation(0, dot(v, direction_vector(line2)))
     r_solved, s_solved = symbolic_linear_solve([dot1, dot2], [r, s])
-    return line1(r_solved), line2(s_solved)
+    return line1(Symbolics.value(r_solved)), line2(Symbolics.value(s_solved))
 end
 
