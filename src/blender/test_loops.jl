@@ -24,10 +24,6 @@ ONE_CROSSING =
                (0, 1, 0, 1),
                0.2)
 
-if !is_running_on_github()
-    blender_render_loops(ONE_CROSSING, "one_crossing")
-end
-
 
 ### Three Linked Loops:
 
@@ -51,7 +47,6 @@ THREE_LINKED_LOOPS = let
                               false)
               ]
         end
-        println("unit_circle:\n", unit_circle)
         # PointsOfInterest for a tilted unit circle:
         map(LinearMap(RotY(pi / 4)), unit_circle)
     end
