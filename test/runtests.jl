@@ -23,6 +23,7 @@ include("loop_test.jl")
         blender_render_loops(ONE_CROSSING, "one_crossing")
         blender_render_loops(THREE_LINKED_LOOPS, "three_linked_loops")
         blender_render_loops(TREFOIL, "trefoil")
+        blender_render_loops(SQUARE_KNOT, "square_knot")
     end
 end
 

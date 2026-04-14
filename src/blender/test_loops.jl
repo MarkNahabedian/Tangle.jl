@@ -1,4 +1,4 @@
-export UNKNOT, ONE_CROSSING, THREE_LINKED_LOOPS, TREFOIL
+export UNKNOT, ONE_CROSSING, THREE_LINKED_LOOPS, TREFOIL, SQUARE_KNOT
 
 UNKNOT = Loop()
 
@@ -87,18 +87,20 @@ TREFOIL = let
     z0(symb) = (points[symb], symb)
     over(symb) = (points[symb] + [ 0, 0, 1 ], string(symb) * "over")
     under(symb) = (points[symb] + [ 0, 0, -1 ], string(symb) * "under")
+    cploop(cp1, cp2, yoffset) = ((points[cp1] + points[cp2])//2 + [ 0, yoffset, 0 ],
+                                 string(cp1) * "-" * string(cp2))
     visits = [
         z0(:top), z0(:ulcurve),
         under(:cp1),
-        z0(:middle12l),
+        cploop(:cp1, :cp2, -1),
         over(:cp2),
-        z0(:middle23u),
+        cploop(:cp2, :cp3, 1),
         under(:cp3),
         z0(:lrcurve), z0(:bottom), z0(:llcurve),
         over(:cp1),
-        z0(:middle12u),
+        cploop(:cp1, :cp2, 1),
         under(:cp2),
-        z0(:middle23l),
+        cploop(:cp2, :cp3, -1),
         over(:cp3),
         z0(:urcurve)
     ]
@@ -114,68 +116,67 @@ TREFOIL = let
                0.2)
 end
 
-#=
-# Square Knot
 
-let
-square_knot_loops =
-    let
-        op = NoOp()
-        cp1xy = [-1, 1]
-        cp2xy = [0, 1]
-        cp3xy = [1, 1]
-        cp4xy = [1, -1]
-        cp5xy = [0, -1]
-        cp6xy = [-1, -1]
-        inter_cp_offset = [0, 0.25]
-        mid(cp1, cp2) = (cp1 + cp2) / 2
-        square_knot_loop1 = let
-            points = [
-                [-4, 0, 0,   :left],
-                [cp1xy..., 0.25, :cp1_a],
-                [(mid(cp1xy, cp2xy) - inter_cp_offset)..., 0, ""],
-                [cp2xy..., -0.25, :cp2_a],
-                [(mid(cp2xy, cp3xy) + inter_cp_offset)..., 0, ""],
-                [cp3xy..., 0.25, :cp3_a],
-                [2, 0, 0, :loop],
-                [cp4xy..., 0.25, :cp4a],
-                [(mid(cp4xy, cp5xy) - inter_cp_offset)..., 0, ""],
-                [cp5xy..., -0.25, :cp5a],
-                [(mid(cp5xy, cp6xy) + inter_cp_offset)..., 0, ""],
-                [cp6xy..., 0.25, :cp6a],
-                [-4, 0, 0, :left2]
-            ]
-            Loop(map(enumerate(points)) do i, p
-                     x, y, z, name = p
-                     PointOfInterest(KnotParameter((i - 1) // length(points)),
-                                     x, y, z, name, op)
-                 end), op
-        end
-        square_knot_loop2 = let
-            points = [
-                [4, 0, 0,   :right],
-                [cp4xy..., -0.25, :cp4_b],
-                [(mid(cp4xy, cp5xy) + inter_cp_offset)..., 0, ""],
-                [cp5xy..., 0.25, :cp5_b],
-                [(mid(cp5xy, cp6xy) - inter_cp_offset)..., 0, ""],
-                [cp6xy..., -0.25, :cp6_b],
-                [-2, 0, 0, :loop],
-                [cp1xy..., -0.25, :cp1_b],
-                [(mid(cp1xy, cp2xy) + inter_cp_offset)..., 0, ""],
-                [cp2xy..., 0.25, :cp2_b],
-                [(mid(cp2xy, cp3xy) - inter_cp_offset)..., 0, ""],
-                [cp3xy..., -0.25, :cp3_b],
-                [4, 0, 0, :right2]
-            ]
-            Loop(map(enumerate(points)) do i, p
-                     x, y, z, name = p
-                     PointOfInterest(KnotParameter((i - 1) // length(points)),
-                                     x, y, z, name, op)
-                 end), op
-
-        end
-        [square_knot_loop1, square_knot_loop2]
-    end
-
-=#
+SQUARE_KNOT = let
+    op = NoOp()
+    points = Dict()
+    xmax = 6
+    ymax = 6
+    points[:top] =     [ 0,      ymax,       0 ]
+    points[:bottom] =  [ 0,     -ymax,       0 ]
+    points[:ulcurve] = [ -xmax,  ymax * 2/3, 0 ]
+    points[:urcurve] = [  xmax,  ymax * 2/3, 0 ]
+    points[:llcurve] = [ -xmax, -ymax * 2/3, 0 ]
+    points[:lrcurve] = [  xmax, -ymax * 2/3, 0 ]
+    points[:cp1] = [ -2, 2, 0 ]
+    points[:cp2] = [  0, 2, 0 ]
+    points[:cp3] = [  2, 2, 0 ]
+    points[:rightbend] = [ 3, 0, 1 ]
+    points[:cp4] = [ -2, -2, 0 ]
+    points[:cp5] = [  0, -2, 0 ]
+    points[:cp6] = [  2, -2, 0 ]
+    points[:leftbend] = [ -3, 0, -1 ]
+    z0(symb) = (points[symb], symb)
+    over(symb) = (points[symb] + [ 0, 0, 1 ], string(symb) * "over")
+    under(symb) = (points[symb] + [ 0, 0, -1 ], string(symb) * "under")
+    cploop(cp1, cp2, yoffset) = ((points[cp1] + points[cp2])//2 + [ 0, yoffset, 0 ],
+                                 string(cp1) * "-" * string(cp2))
+    visits = [
+        z0(:top), z0(:ulcurve),
+        over(:cp1),
+        cploop(:cp1, :cp2, -1),
+        under(:cp2),
+        cploop(:cp2, :cp3, 1),
+        over(:cp3),
+        z0(:rightbend),
+        over(:cp6),
+        cploop(:cp6, :cp5, -1),
+        under(:cp5),
+        cploop(:cp5, :cp4, 1),
+        over(:cp4),
+        z0(:llcurve), z0(:bottom), z0(:lrcurve),
+        under(:cp6),
+        cploop(:cp6, :cp5, 1),
+        over(:cp5),
+        cploop(:cp5, :cp4, -1),
+        under(:cp4),
+        z0(:leftbend),
+        under(:cp1),
+        cploop(:cp1, :cp2, 1),
+        over(:cp2),
+        cploop(:cp2, :cp3, -1),
+        under(:cp3),
+        z0(:urcurve)
+    ]
+    params = 0//1 : (1//length(visits)) : 1//1
+    StyledLoop("square_knot",
+               Loop([
+                   map(params, visits) do p, (coords, label)
+                       PointOfInterest(KnotParameter(p), coords..., label, op)
+                   end...,
+                   PointOfInterest(typemax(KnotParameter), points[:top]..., :end, op)
+                   ], op),
+               (0, 1, 0, 1),
+               0.2)
+end
 
