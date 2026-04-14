@@ -1,4 +1,4 @@
-export UNKNOT, ONE_CROSSING, THREE_LINKED_LOOPS
+export UNKNOT, ONE_CROSSING, THREE_LINKED_LOOPS, TREFOIL
 
 UNKNOT = Loop()
 
@@ -65,6 +65,54 @@ THREE_LINKED_LOOPS = let
     end
 end
 
+
+TREFOIL = let
+    op = NoOp()
+    points = Dict()
+    xmax = 3
+    ymax = 4
+    points[:top] = [ 0, ymax, 0 ]
+    points[:bottom] = [ 0, -ymax, 0 ]
+    points[:ulcurve] = [ -xmax, 2, 0 ]
+    points[:urcurve] = [ xmax, 2, 0 ]
+    points[:llcurve] = [ -xmax, -2, 0 ]
+    points[:lrcurve] = [ xmax, -2, 0 ]
+    points[:cp1] = [ -2, 0, 0 ]
+    points[:middle12u] = [-1, 1, 0 ]
+    points[:middle12l] = [-1, -1, 0 ]
+    points[:cp2] = [ 0, 0, 0 ]
+    points[:middle23u] = [1, 1, 0 ]
+    points[:middle23l] = [1, -1, 0 ]    
+    points[:cp3] = [ 2, 0, 0 ]
+    z0(symb) = (points[symb], symb)
+    over(symb) = (points[symb] + [ 0, 0, 1 ], string(symb) * "over")
+    under(symb) = (points[symb] + [ 0, 0, -1 ], string(symb) * "under")
+    visits = [
+        z0(:top), z0(:ulcurve),
+        under(:cp1),
+        z0(:middle12l),
+        over(:cp2),
+        z0(:middle23u),
+        under(:cp3),
+        z0(:lrcurve), z0(:bottom), z0(:llcurve),
+        over(:cp1),
+        z0(:middle12u),
+        under(:cp2),
+        z0(:middle23l),
+        over(:cp3),
+        z0(:urcurve)
+    ]
+    params = 0//1 : (1//length(visits)) : 1//1
+    StyledLoop("trefoil",
+               Loop([
+                   map(params, visits) do p, (coords, label)
+                       PointOfInterest(KnotParameter(p), coords..., label, op)
+                   end...,
+                   PointOfInterest(typemax(KnotParameter), points[:top]..., :end, op)
+                   ], op),
+               (0, 1, 0, 1),
+               0.2)
+end
 
 #=
 # Square Knot
