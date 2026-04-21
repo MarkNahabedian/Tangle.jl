@@ -20,11 +20,12 @@ include("loop_test.jl")
         blender_render_loops(StyledLoop("unknot", UNKNOT, (0, 1, 1, 1), 0.2),
                              "unknot";
                              steps_between_poi=8)
-        blender_render_loops(ONE_CROSSING, "one_crossing")
-        blender_render_loops(THREE_LINKED_LOOPS, "three_linked_loops")
-        blender_render_loops(BORROMEAN_RINGS, "borromean_rings")
-        blender_render_loops(TREFOIL, "trefoil")
-        blender_render_loops(SQUARE_KNOT, "square_knot")
+        steps = 8
+        blender_render_loops(ONE_CROSSING, "one_crossing"; steps_between_poi=steps)
+        blender_render_loops(THREE_LINKED_LOOPS, "three_linked_loops"; steps_between_poi=steps)
+        blender_render_loops(BORROMEAN_RINGS, "borromean_rings"; steps_between_poi=steps)
+        blender_render_loops(TREFOIL, "trefoil"; steps_between_poi=steps)
+        blender_render_loops(SQUARE_KNOT, "square_knot"; steps_between_poi=steps)
     end
 end
 
