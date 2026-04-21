@@ -1,4 +1,6 @@
-export UNKNOT, ONE_CROSSING, THREE_LINKED_LOOPS, TREFOIL, SQUARE_KNOT
+export UNKNOT, ONE_CROSSING,
+    THREE_LINKED_LOOPS, BORROMEAN_RINGS,
+    TREFOIL, SQUARE_KNOT
 
 UNKNOT = Loop()
 
@@ -65,6 +67,40 @@ THREE_LINKED_LOOPS = let
     end
 end
 
+BORROMEAN_RINGS = let
+    op = NoOp()
+    major_diameter = 8
+    minor_diameter = 6
+    points = [ [ major_diameter, 0, 0 ],
+               [ 0, minor_diameter, 0 ],
+               [ - major_diameter, 0, 0 ],
+               [ 0, - minor_diameter, 0 ] ]
+    names = map(n -> "loop$n", 1:3)
+    coordinate_permutation = [ [ 1, 2, 3 ],
+                               [ 3, 1, 2 ],
+                               [ 2, 3, 1 ] ]
+    colors = [ [ 1, 0, 0, 1],
+               [ 0, 1, 0, 1 ],
+               [ 0, 0, 1, 1 ] ]
+    map(zip(1:3, names, coordinate_permutation, colors)) do (i, name, permutation, color)
+        permute(point) = point[permutation]
+        permuted = map(permute, points)
+        denominator = length(permuted)
+        poi = [ map(zip(0 : (length(permuted) - 1),
+                        permuted)) do (kpn, point)
+                            PointOfInterest(KnotParameter(kpn // length(permuted)),
+                                            point...,
+                                            """$(name)_$(join(point, "_"))""",
+                                            op)
+                        end ...,
+                PointOfInterest(typemax(KnotParameter),
+                                first(permuted)...,
+                                "close", op)
+                ]
+        loop = Loop(poi, op)
+        StyledLoop("borromean_ring$i", loop, color, 0.1)
+    end
+end
 
 TREFOIL = let
     op = NoOp()
