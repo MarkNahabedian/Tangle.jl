@@ -71,7 +71,7 @@ function loop_points_for_graph(loop::Loop, steps_between_poi)
         end
     end
     return map(sort(params)) do p
-        loop.knot_function(p)
+        DEFAULT_KNOT_IMPLEMENTATION(loop)(p)
     end
 end
 

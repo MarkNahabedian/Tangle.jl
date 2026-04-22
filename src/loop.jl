@@ -1,4 +1,3 @@
-using CubicSplines
 using Printf
 
 export Loop, operations, InitializeLoop, find_poi, centroid
@@ -29,8 +28,8 @@ specific value for the parameter `p`.
 struct Loop
     poi::PointsOfInterest    # points of interest
     op::Operation            # The operation that created this Loop.
-    # We cache the knot function here
-    knot_function
+    # We cache the knot function implementations here
+    knot_functions::Vector{KnotFunction}
 
     function Loop()
         op = InitializeLoop()
@@ -49,17 +48,10 @@ struct Loop
     
     function Loop(poi::PointsOfInterest, op::Operation)
         poi = sort(poi)
-        values(fieldname) = map(p -> getfield(p, fieldname), poi)
         # ??? Do we need to explicitly repeat the first PointOfInterest?
         # Loop is currently "closed" by adding the first point again
-        # but with a knot parameter that is just less than 1.
-        p = map(kp -> Float64(kp.p), values(:p))
-        x = CubicSpline(p, values(:x))
-        y = CubicSpline(p, values(:y))
-        z = CubicSpline(p, values(:z))
-        new(poi, op,
-            # A knot function which maps from a PointOfInterest to a Point:
-            p::Real -> Point(x(p), y(p), z(p)))
+        # but with the parameter typemax(KnotParameter).
+        new(poi, op, KnotFunction[])
     end
 end
 
@@ -109,7 +101,6 @@ end
 operation(cp::Crosspoint) = cp.in.operation
 
 
-
 """
     (::Loop)(at)
 
@@ -120,11 +111,11 @@ This function should be continuous and defined by the specified points
 of interest.
 """
 function (loop::Loop)(p::KnotParameter)
-    loop.knot_function(p)
+    DEFAULT_KNOT_IMPLEMENTATION(loop)(p)
 end
 
 function (loop::Loop)(p::Rational)
-    loop.knot_function(p)
+    DEFAULT_KNOT_IMPLEMENTATION(loop)(p)
 end
 
 

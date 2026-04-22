@@ -8,9 +8,16 @@ using Rotations
 import StaticArrays
 using PropertyMethods
 
-export is_running_on_github
+export is_running_on_github, KnotFunction
 
 is_running_on_github() = get(ENV, "CI", "false") == "true"
+
+
+"""
+ KnotFunction maps a [`KnotParameter`](@ref) to a point in 3
+dimensional space.
+"""
+abstract type KnotFunction end
 
 
 include("utils.jl")
@@ -21,7 +28,11 @@ include("knot_parameter.jl")
 include("operations.jl")
 
 include("point_of_interest.jl")
+
+global DEFAULT_KNOT_IMPLEMENTATION
 include("loop.jl")
+include("CubicSpline_KnotFunction.jl")
+DEFAULT_KNOT_IMPLEMENTATION = CSKF
 
 include("operations/AddPOI.jl")
 
