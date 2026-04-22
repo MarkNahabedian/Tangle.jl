@@ -1,13 +1,13 @@
-export UNKNOT, ONE_CROSSING,
+export EXAMPLE_KNOTS, UNKNOT, ONE_CROSSING,
     THREE_LINKED_LOOPS, BORROMEAN_RINGS,
     TREFOIL, SQUARE_KNOT
 
-UNKNOT = Loop()
+UNKNOT = [ StyledLoop("unknot", Loop(), (0, 1, 0, 1), 0.2) ]
 
 
 ### One Crossing:
 
-ONE_CROSSING =
+ONE_CROSSING = [
     StyledLoop("one_crossing",
                let
                    op = NoOp()
@@ -24,7 +24,7 @@ ONE_CROSSING =
                    ], op)
                end,
                (0, 1, 0, 1),
-               0.2)
+               0.2) ]
 
 
 ### Three Linked Loops:
@@ -102,7 +102,7 @@ BORROMEAN_RINGS = let
     end
 end
 
-TREFOIL = let
+TREFOIL = [ let
     op = NoOp()
     points = Dict()
     xmax = 3
@@ -150,10 +150,10 @@ TREFOIL = let
                    ], op),
                (0, 1, 0, 1),
                0.2)
-end
+end ]
 
 
-SQUARE_KNOT = let
+SQUARE_KNOT = [ let
     op = NoOp()
     points = Dict()
     xmax = 6
@@ -214,5 +214,15 @@ SQUARE_KNOT = let
                    ], op),
                (0, 1, 0, 1),
                0.2)
-end
+end ]
+
+
+EXAMPLE_KNOTS = [
+    UNKNOT,
+    ONE_CROSSING,
+    THREE_LINKED_LOOPS,
+    BORROMEAN_RINGS,
+    TREFOIL,
+    SQUARE_KNOT
+]
 

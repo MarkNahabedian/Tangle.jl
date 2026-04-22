@@ -17,15 +17,10 @@ include("loop_test.jl")
 
 @testset "test blender rendering" begin
     if !is_running_on_github()
-        blender_render_loops(StyledLoop("unknot", UNKNOT, (0, 1, 1, 1), 0.2),
-                             "unknot";
-                             steps_between_poi=8)
-        steps = 8
-        blender_render_loops(ONE_CROSSING, "one_crossing"; steps_between_poi=steps)
-        blender_render_loops(THREE_LINKED_LOOPS, "three_linked_loops"; steps_between_poi=steps)
-        blender_render_loops(BORROMEAN_RINGS, "borromean_rings"; steps_between_poi=steps)
-        blender_render_loops(TREFOIL, "trefoil"; steps_between_poi=steps)
-        blender_render_loops(SQUARE_KNOT, "square_knot"; steps_between_poi=steps)
+        blender_render_loops(UNKNOT, "unknot"; steps_between_poi=8)
+        for knot in EXAMPLE_KNOTS
+            blender_render_loops(knot, knot[1].name; steps_between_poi=8)
+        end
     end
 end
 
