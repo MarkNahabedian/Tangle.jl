@@ -60,7 +60,8 @@ Returns a list of spatial coordinates of the points of interest of
 `loop` and `steps_between_poi` points interpolated in between, ordered
 by knot parameter.
 """
-function loop_points_for_graph(loop::Loop, steps_between_poi)
+function loop_points_for_graph(loop::Loop, steps_between_poi;
+                               knot_function_type::Type{<:KnotFunction} = DEFAULT_KNOT_IMPLEMENTATION,)
     params = Rational[]    # Real[]
     for i in 1 : (length(loop.poi) - 1)
         poi1p = loop.poi[i].p.p
@@ -71,7 +72,7 @@ function loop_points_for_graph(loop::Loop, steps_between_poi)
         end
     end
     return map(sort(params)) do p
-        DEFAULT_KNOT_IMPLEMENTATION(loop)(p)
+        knot_function_type(loop)(p)
     end
 end
 

@@ -32,6 +32,7 @@ blender_render_loops(sloop::StyledLoop, filename_base::String; kwargs...) =
 
 function blender_render_loops(loops::Vector{StyledLoop},
                               filename_base::String;
+                              knot_function_type::Type{<:KnotFunction} = DEFAULT_KNOT_IMPLEMENTATION,
                               steps_between_poi::Int = 3)
     mkpath(BLENDER_TEMP_DIR)
     json_file = joinpath(BLENDER_TEMP_DIR, filename_base * ".json")
@@ -44,7 +45,8 @@ function blender_render_loops(loops::Vector{StyledLoop},
                            "color" => styled_loop.color,
                            "diameter" => styled_loop.diameter,
                            "coords" => loop_points_for_graph(styled_loop.loop,
-                                                             steps_between_poi)
+                                                             steps_between_poi;
+                                                             knot_function_type=knot_function_type)
                        )
                    end,
                    4)

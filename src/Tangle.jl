@@ -32,6 +32,8 @@ include("point_of_interest.jl")
 global DEFAULT_KNOT_IMPLEMENTATION
 include("loop.jl")
 include("CubicSpline_KnotFunction.jl")
+include("symbolic_cubic_splines.jl")
+include("Symbolics_KnotFunction.jl")
 DEFAULT_KNOT_IMPLEMENTATION = CSKF
 
 include("operations/AddPOI.jl")
@@ -43,8 +45,6 @@ include("blender/blender_render_loop.jl")
 include("blender/test_loops.jl")
 
 include("vector_utils.jl")
-
-include("symbolic_cubic_splines.jl")
 
 # include("strand.jl")
 # include("reidermeister.jl")
