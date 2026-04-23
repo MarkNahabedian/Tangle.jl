@@ -15,6 +15,7 @@ export make_ifelse_for_segments, symbolic_cubic_spline_segments_for_axes,
     proximity_metric, metric_to_function, plot_metric,
     build_function_expression_value
 
+# islooped depends on poi being sorted.
 islooped(poi::PointsOfInterest) =
     poi[1].p == typemin(KnotParameter) &&
     poi[end].p == typemax(KnotParameter) &&
@@ -45,8 +46,23 @@ evaluation if necessary.
 
 =#
 
-getvar(expr, v::Symbol) = first(filter(x -> x.name == v,
-                                       Symbolics.get_variables(expr)))
+function getvar(expr::Symbolics.Num, v::Symbol)
+    vars = filter(x -> x.name == v,
+                  Symbolics.get_variables(expr))
+    if isempty(vars)
+        return nothing
+    end
+    first(vars)
+end
+        
+function getvar(exprs::Vector, v::Symbol)
+    for e in exprs
+        found = getvar(e, v)
+        if found != nothing
+            return found
+        end
+    end
+end
 
 
 SYMBOLIC_CUBIC_SPLINES_FOLD = Val(true)
@@ -58,6 +74,11 @@ struct SCSSegment
     upper_bound::Rational
     polynomial
 end
+
+function getvar(segment::SCSSegment, v::Symbol)
+    getvar(segment.polynomial, v)
+end
+
 
 #=
 symbolic_cubic_spline(ONE_CROSSING.loop.poi)
@@ -72,7 +93,7 @@ function make_ifelse_for_segments(segments)
     x_segments = segments[1]
     y_segments = segments[2]
     z_segments = segments[3]
-    kp = getvar(x_segments[1].polynomial, :kp)
+    kp = getvar(segments, :kp)
     function make_ifelse(i)
         arr = Symbolics.Arr([ x_segments[i].polynomial,
                               y_segments[i].polynomial,
@@ -124,7 +145,7 @@ function symbolic_cubic_spline_segments_for_one_axis(axis, poi::PointsOfInterest
         # poi[i] is a solutiion to polynomial:
         push!(equations,
               getfield(poi[i], axis) ~ substitute(polynomial,
-                                                  Dict(kp => massage_kp(poi[i].p));
+                                                  Dict(kp => Float64(massage_kp(poi[i].p)));
                                                   fold = SYMBOLIC_CUBIC_SPLINES_FOLD))
         # So is poi[i+1]
         push!(equations,
@@ -170,7 +191,7 @@ function symbolic_cubic_spline_segments_for_one_axis(axis, poi::PointsOfInterest
     end
     # Solve for the coefficients of the polymomials:
     global EQUATIONS = equations
-    println("equations: ", equations)
+    # println("equations: ", equations)
     coefficients = OrderedDict(map(t -> Pair(t...),
                                    zip(coefficient_vars,
                                        symbolic_linear_solve(equations,
