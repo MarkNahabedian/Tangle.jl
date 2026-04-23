@@ -17,9 +17,13 @@ include("loop_test.jl")
 
 @testset "test blender rendering" begin
     if !is_running_on_github()
-        blender_render_loops(UNKNOT, "unknot"; steps_between_poi=8)
-        for knot in EXAMPLE_KNOTS
-            blender_render_loops(knot, knot[1].name; steps_between_poi=8)
+        for t in subtypes(KnotFunction)
+            for knot in EXAMPLE_KNOTS
+                filename = "$(string(t))_$(knot[1].name)"
+                blender_render_loops(knot, filename;
+                                     steps_between_poi=8,
+                                     knot_function_type=t)
+            end
         end
     end
 end
