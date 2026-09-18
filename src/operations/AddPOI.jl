@@ -3,9 +3,12 @@ export AddPOI
 """
     AddPOI(from_loop::Loop, at::KnotParameter, label)
 
-Adds a new `PointOfInterest` to the specified `Loop` at the specified
-`KnotParameter`.  The new PointOfInterest will be given the specified
-`label`.  It's location will be interpolated from the `KnotParameter`.
+Creates an Oeration that adds a new `PointOfInterest` to the specified
+`Loop` at the specified `KnotParameter`.  The new PointOfInterest will
+be given the specified `label`.  It's location will be interpolated
+from the `KnotParameter`.
+
+When called, the operation returns a new [`Loop`](@ref)..
 """
 struct AddPOI <: Operation
     sequence::Integer
